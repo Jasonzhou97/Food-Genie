@@ -43,7 +43,7 @@ export default function HomeScreen() {
         </View>
       </View>
       <View>
-        <Text>Trending Places </Text>
+        <Text style={styles.trendingText}>Trending Places </Text>
       </View>
       <ImageCarousel/>
     </ParallaxScrollView>
@@ -84,19 +84,7 @@ const styles = StyleSheet.create({
   profileIcon:{
     marginLeft:10,
   },
-  carouselContainer: {
-    flex: 1,
-    paddingVertical: 16,
-  },
-  carouselItem: {
-    flex: 1,
-    borderWidth: 0,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  carouselText: {
-    textAlign: 'center',
-    fontSize: 30,
-  },
+  trendingText:{
 
+  }
 });
