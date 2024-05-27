@@ -1,15 +1,31 @@
-import {View,Text,StyleSheet,Image} from 'react-native'
+import {View,Text,StyleSheet,Image,TouchableOpacity} from 'react-native'
+import tailwind from 'tailwind-rn';
+import CustomText from '../../components/CustomText';
 
 export default function AuthenticateScreen(){
         return(
             <View style={styles.mainContainer}>
                 <View>
-                    <Text style={styles.text}>
+                    <CustomText style={styles.text}>
                         Hungry? Let's get started!
-                    </Text>
+                    </CustomText>
                     <View style={styles.imageContainer}>
-                        <Image source={require('@/assets/images/eating.jpeg')}
+                        <Image source={require('@/assets/images/eating.png')}
                         style={styles.image}/>
+                        
+                    </View>
+                    <View>
+                        <TouchableOpacity 
+                        
+                         style={styles.regCon}>
+                            <Text style={styles.regText}>Sign Up</Text>
+                        </TouchableOpacity>
+                        <View style={styles.logCon}>
+                            <Text style={{fontWeight:'semibold'}} >Already have an Account? </Text>
+                            <TouchableOpacity>
+                                <Text style={{fontWeight:'bold',color:'black'}}>Log in</Text>
+                            </TouchableOpacity>
+                        </View>
                         
                     </View>
                 </View>
@@ -19,26 +35,52 @@ export default function AuthenticateScreen(){
 
 const styles = StyleSheet.create({
     mainContainer:{
-        backgroundColor:'#FFE8C8',
+        backgroundColor:'#FAF3F0',
         flex:1,
 
     },
     secondContainer:{
         flexDirection:'row',
         justifyContent:'space-around',
-        backgroundColor:'#FFE8C8',
     },
     text:{
         marginTop:100,
-        alignContent:'center'
+        textAlign:'center',
+        alignContent:'center',
+        fontSize:20,
+        fontWeight:'bold'
+    },
+    regCon:{
+        backgroundColor:'#FFCACC',
+        borderRadius:20,
+        padding:3,
+        margin:40,
+        marginTop:100,
+        marginBottom:20
+
+
+    },
+    logCon:{
+        flexDirection:'row',
+        justifyContent:'center'
+    },
+    regText:{
+        color:'black',
+        textAlign:'center',
+        fontSize:20,
+        padding:10,
+        fontWeight:'bold'
+   
     },
     imageContainer:{
         marginTop:50,
         flexDirection:'row',
-        justifyContent:'center'
+        justifyContent:'center',
+        
     },
     image:{
-        width:350,
-        height:350
+        width:300,
+        height:300,
+        resizeMode: 'stretch',
     }
 })
