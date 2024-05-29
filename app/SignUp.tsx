@@ -1,11 +1,13 @@
 import {View,Text,StyleSheet,Image,TouchableOpacity} from 'react-native'
 import tailwind from 'tailwind-rn';
-import CustomText from '../../components/CustomText';
-import { useNavigation } from '@react-navigation/native'
-import { SafeAreaView } from 'react-native-safe-area-context'
+import CustomText from '../components/CustomText';
+import { useNavigation} from '@react-navigation/native'
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { NavigationContainer } from '@react-navigation/native';
+ 
 
-export default function AuthenticateScreen(){
-
+export default function SignUp(){
+        const navigation = useNavigation();
         return(
             <View style={styles.mainContainer}>
                 <View>
@@ -19,13 +21,14 @@ export default function AuthenticateScreen(){
                     </View>
                     <View>
                         <TouchableOpacity 
-                        onPress={() => navigation.navigate('SignUp')}
+                        onPress={() => navigation.navigate('Register')}
                          style={styles.regCon}>
                             <Text style={styles.regText}>Sign Up</Text>
                         </TouchableOpacity>
                         <View style={styles.logCon}>
                             <Text style={{fontWeight:'semibold'}} >Already have an Account? </Text>
-                            <TouchableOpacity>
+                            <TouchableOpacity
+                            onPress={() => navigation.navigate('Login')}>
                                 <Text style={{fontWeight:'bold',color:'black'}}>Log in</Text>
                             </TouchableOpacity>
                         </View>

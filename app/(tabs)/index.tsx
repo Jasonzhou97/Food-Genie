@@ -5,13 +5,14 @@ import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { TextInput } from 'react-native-gesture-handler';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Searchbar } from 'react-native-paper';
 import { Ionicons } from '@expo/vector-icons';
 import ImageCarousel from '@/components/Carousel'
-
+import { useNavigation} from '@react-navigation/native'
 
 export default function HomeScreen() {
+  const navigation = useNavigation();
   const width = Dimensions.get('window').width;
   //search bar state management
   const [searchQuery, setSearchQuery] = useState('');
@@ -37,7 +38,7 @@ export default function HomeScreen() {
       style={styles.searchBar}
         />
         
-        <TouchableOpacity>
+        <TouchableOpacity onPress={()=>navigation.navigate("SignUp")}>
         <Ionicons name="person-circle-outline" size={40} color="black" style={styles.profileIcon} />
         </TouchableOpacity>
         </View>
