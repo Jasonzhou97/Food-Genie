@@ -1,12 +1,18 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { StyleSheet, Image, Platform, View,Text,TouchableOpacity} from 'react-native';
 import { useNavigation} from '@react-navigation/native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function Login() {
   const navigation = useNavigation();
   return (
     <View>
-
+      <SafeAreaView>
+        <TouchableOpacity
+          onPress={()=>navigation.goBack()}>
+          <Text>go back</Text>
+        </TouchableOpacity>
+      </SafeAreaView>
     </View>
   );
 }
