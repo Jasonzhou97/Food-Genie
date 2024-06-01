@@ -13,7 +13,7 @@ export default function LoginScreen() {
 
   const handleSubmit = async () => {
     if (email && password) {
-      try {
+      try { 
         await signInWithEmailAndPassword(auth, email, password);
         Alert.alert('Sign In', 'Sign in successful!', [
           {
@@ -27,6 +27,7 @@ export default function LoginScreen() {
           let msg = err.message;
           if (msg.includes('invalid-login-credentials')) msg = "Invalid credentials";
           if (msg.includes('auth/invalid-email')) msg = "Invalid email";
+          if (msg.includes('auth/invalid-credential')) msg = "Invalid email or password";
           Alert.alert('Sign In', msg);
         } else {
           console.log('An unexpected error occurred', err);
@@ -55,7 +56,7 @@ export default function LoginScreen() {
           <Text style={styles.label}>Email Address</Text>
           <TextInput
             style={styles.input}
-            placeholder="email"
+            placeholder="E.g. abc@gmail.com"
             value={email}
             onChangeText={value => setEmail(value)}
             autoCapitalize="none"
@@ -65,7 +66,7 @@ export default function LoginScreen() {
           <TextInput
             style={styles.input}
             secureTextEntry
-            placeholder="password"
+            placeholder="Enter your password"
             value={password}
             onChangeText={value => setPassword(value)}
             autoCapitalize="none"
@@ -123,16 +124,17 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   loginImage: {
-    width: 200,
-    height: 200,
+    width: 250,
+    height: 250,
   },
   formContainer: {
     flex: 1,
     backgroundColor: 'white',
     paddingHorizontal: 32,
-    paddingTop: 32,
+    paddingTop: 20,
     borderTopLeftRadius: 50,
     borderTopRightRadius: 50,
+    marginTop: -250,
   },
   form: {
     padding: 16,
@@ -184,6 +186,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#E0E0E0',
     borderRadius: 16,
     marginHorizontal: 12,
+    marginTop: 10,
   },
   icon: {
     width: 40,
@@ -192,7 +195,7 @@ const styles = StyleSheet.create({
   signupPromptContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
-    marginTop: 28,
+    marginTop: -10,
   },
   signupPromptText: {
     color: '#9E9E9E',
@@ -200,6 +203,6 @@ const styles = StyleSheet.create({
   },
   signupLinkText: {
     fontWeight: '600',
-    color: '#FFEB3B',
+    color: '#FFCACC',
   },
 });

@@ -17,7 +17,7 @@ export default function SignUp(){
                     <View style={styles.imageContainer}>
                         <Image source={require('@/assets/images/eating.png')}
                         style={styles.image}/>
-                        
+                    
                     </View>
                     <View>
                         <TouchableOpacity 

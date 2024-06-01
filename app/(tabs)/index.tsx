@@ -21,9 +21,9 @@ export default function HomeScreen() {
       headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
       headerImage={
         <Image
-          source={require('@/assets/images/food_1.jpeg')}
+          source={require('@/assets/images/Logo.png')}
           style={styles.stockLogo}
-          resizeMode='cover'
+          resizeMode='contain'
         />
       }>
 
@@ -74,7 +74,8 @@ const styles = StyleSheet.create({
   },
   stockLogo: {
     width: '100%', // Adjust the width as needed
-    height: 300,
+    height: 290,
+    marginTop: -20,
   },
   mainContainer:{
     flex:1,

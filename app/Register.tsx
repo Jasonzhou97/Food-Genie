@@ -140,8 +140,8 @@ const styles = StyleSheet.create({
     height:100
   },
   signupImage: {
-    width: 155,
-    height: 100,
+    width: 200,
+    height: 200,
   },
   formContainer: {
     flex: 1,
@@ -150,6 +150,7 @@ const styles = StyleSheet.create({
     paddingTop: 32,
     borderTopLeftRadius: 50,
     borderTopRightRadius: 50,
+    marginTop: -300,
   },
 
   label: {
@@ -171,6 +172,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     backgroundColor: '#FFCACC',
     borderRadius: 16,
+    marginTop: 20,
   },
   submitButtonText: {
     fontSize: 18,
@@ -188,21 +190,23 @@ const styles = StyleSheet.create({
   iconContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
-    padding:48
+    marginBottom: 40,
   },
   iconButton: {
-    padding: 6,
+    padding: 8,
     backgroundColor: '#E0E0E0',
     borderRadius: 16,
+    marginHorizontal: 12,
+    marginTop: 10,
   },
   icon: {
-    width: 30,
-    height: 30,
+    width: 40,
+    height: 40,
   },
   loginPromptContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
-    marginTop: 28,
+    marginTop: -10,
   },
   loginPromptText: {
     color: '#9E9E9E',
@@ -210,7 +214,7 @@ const styles = StyleSheet.create({
   },
   loginLinkText: {
     fontWeight: '600',
-    color: '#FFEB3B',
+    color: '#FFCACC',
   },
 
 });
