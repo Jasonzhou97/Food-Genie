@@ -26,7 +26,7 @@ export default function SignUp(){
                             <Text style={styles.regText}>Sign Up</Text>
                         </TouchableOpacity>
                         <View style={styles.logCon}>
-                            <Text style={{fontWeight:'semibold'}} >Already have an Account? </Text>
+                            <Text style={{fontWeight:'semibold'}} >Already have an account? </Text>
                             <TouchableOpacity
                             onPress={() => navigation.navigate('Login')}>
                                 <Text style={{fontWeight:'bold',color:'black'}}>Log in</Text>
