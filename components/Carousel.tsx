@@ -24,7 +24,6 @@ const ImageCarousel: React.FC = () => {
         autoPlay={true}
         data={carouselData}
         scrollAnimationDuration={1000}
-        onSnapToItem={(index) => console.log('current index:', index)}
         renderItem={({ item }) => (
           <View style={styles.carouselItem}>
             <Image source={item.source} style={styles.carouselImage} resizeMode="cover" />

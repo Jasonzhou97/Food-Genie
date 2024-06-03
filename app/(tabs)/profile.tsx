@@ -1,25 +1,55 @@
-import React from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
+import React, { useContext } from 'react';
+import { View, Text, StyleSheet, Image, TouchableOpacity, Alert } from 'react-native';
+import { AuthContext } from '../../hooks/AuthContext';
+import { auth } from '../../config/firebase'; 
+import { signOut } from 'firebase/auth';
+import { useNavigation } from '@react-navigation/native';
 
 export default function ProfileScreen() {
+  const { user } = useContext(AuthContext);
+  const navigation = useNavigation();
+  const settingsPress = () => {
+    console.log("testing");
+  }
+  const handleLogout = async () => {
+    try {
+      console.log("Logout button pressed"); // Add logging to verify button press
+      await signOut(auth);
+      Alert.alert('Sign Out', 'You have been signed out successfully');
+      navigation.navigate('SignUp'); 
+    } catch (error) {
+      console.error('Sign Out Error:', error); // Add error logging for better debugging
+      Alert.alert('Sign Out Error');
+    }
+  };
+
+
+  if (!user) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.message}>No user is logged in</Text>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       <Image
-        source={require('@/assets/images/Logo.png')}
+        source={require('../../assets/images/Logo.png')}
         style={styles.profileImage}
       />
-      <Text style={styles.name}>haoyu</Text>
-      <Text style={styles.email}>haoyu@123456.com</Text>
+      <Text style={styles.name}>{user.username || 'No Name Provided'}</Text>
+      <Text style={styles.email}>{user.email}</Text>
 
       <TouchableOpacity style={styles.button}>
         <Text style={styles.buttonText}>Edit Profile</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.button}>
+      <TouchableOpacity onPress={settingsPress} style={styles.button}>
         <Text style={styles.buttonText}>Settings</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.button}>
+      <TouchableOpacity style={styles.button} onPress={handleLogout}>
         <Text style={styles.buttonText}>Log Out</Text>
       </TouchableOpacity>
     </View>
@@ -61,5 +91,9 @@ const styles = StyleSheet.create({
   buttonText: {
     color: '#fff',
     fontSize: 16,
+  },
+  message: {
+    fontSize: 18,
+    color: '#777',
   },
 });
