@@ -10,10 +10,20 @@ import { Searchbar } from 'react-native-paper';
 import { Ionicons } from '@expo/vector-icons';
 import ImageCarousel from '@/components/Carousel'
 import { useNavigation} from '@react-navigation/native'
+import { AuthContext } from '../../hooks/AuthContext';
+import { useContext } from 'react';
 
 export default function HomeScreen() {
   const navigation = useNavigation();
   const width = Dimensions.get('window').width;
+  const { user } = useContext(AuthContext);
+  const iconPress = () => {
+    if (user) {
+      navigation.navigate('profile');
+    } else {
+      navigation.navigate('SignUp');
+    }
+  };
   //search bar state management
   const [searchQuery, setSearchQuery] = useState('');
   return (
@@ -38,7 +48,7 @@ export default function HomeScreen() {
       style={styles.searchBar}
         />
         
-        <TouchableOpacity onPress={()=>navigation.navigate("SignUp")}>
+        <TouchableOpacity onPress={()=>iconPress()}>
         <Ionicons name="person-circle-outline" size={40} color="black" style={styles.profileIcon} />
         </TouchableOpacity>
         </View>
