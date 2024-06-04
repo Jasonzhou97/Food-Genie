@@ -1,13 +1,13 @@
-import { StyleSheet, Image, View, Text, TouchableOpacity, TextInput, Alert, SafeAreaView } from 'react-native';
 import React, { useState } from 'react';
+import { StyleSheet, Image, View, Text, TouchableOpacity, TextInput, Alert, SafeAreaView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { ArrowLeftIcon } from 'react-native-heroicons/solid';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../config/firebase';
+import firestore from '@react-native-firebase/firestore';
 
 export default function SignUpScreen() {
   const navigation = useNavigation();
-  //state management for password and email
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -15,7 +15,16 @@ export default function SignUpScreen() {
   const submit = async () => {
     if (email && password) {
       try {
-        await createUserWithEmailAndPassword(auth, email, password);
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const userId = userCredential.user.uid;
+
+        // Initialize Firestore with empty list of favorite restaurants
+        await firestore().collection('users').doc(userId).set({
+          username: username,
+          email: email,
+          favoriteRestaurants: [],
+        });
+
         Alert.alert('Sign Up', 'Sign up successful!', [
           {
             text: 'OK',
@@ -36,20 +45,17 @@ export default function SignUpScreen() {
       Alert.alert('Sign Up', 'Please fill in all fields');
     }
   };
+
   return (
     <View style={[styles.container, { backgroundColor: '#FFFFF' }]}>
       <SafeAreaView style={styles.safeArea}>
         <View style={styles.header}>
-          <TouchableOpacity
-            onPress={() => navigation.goBack()}
-            style={styles.backButton}
-          >
+          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
             <ArrowLeftIcon size="20" color="black" />
           </TouchableOpacity>
         </View>
         <View style={styles.imageContainer}>
-          <Image source={require('../assets/images/login.jpeg')}
-            style={styles.signupImage} />
+          <Image source={require('../assets/images/login.jpeg')} style={styles.signupImage} />
         </View>
       </SafeAreaView>
       <View style={styles.formContainer}>
@@ -79,30 +85,22 @@ export default function SignUpScreen() {
             onChangeText={value => setPassword(value)}
             placeholder='Enter Password'
           />
-          <TouchableOpacity
-            style={styles.submitButton}
-            onPress={()=>submit()}
-          >
+          <TouchableOpacity style={styles.submitButton} onPress={submit}>
             <Text style={styles.submitButtonText}>
               Sign Up
             </Text>
           </TouchableOpacity>
         </View>
-        <Text style={styles.orText}>
-          Or
-        </Text>
+        <Text style={styles.orText}>Or</Text>
         <View style={styles.iconContainer}>
           <TouchableOpacity style={styles.iconButton}>
-            <Image source={require('../assets/images/google.png')}
-              style={styles.icon} />
+            <Image source={require('../assets/images/google.png')} style={styles.icon} />
           </TouchableOpacity>
           <TouchableOpacity style={styles.iconButton}>
-            <Image source={require('../assets/images/apple.jpeg')}
-              style={styles.icon} />
+            <Image source={require('../assets/images/apple.jpeg')} style={styles.icon} />
           </TouchableOpacity>
           <TouchableOpacity style={styles.iconButton}>
-            <Image source={require('../assets/images/fb.png')}
-              style={styles.icon} />
+            <Image source={require('../assets/images/fb.png')} style={styles.icon} />
           </TouchableOpacity>
         </View>
         <View style={styles.loginPromptContainer}>
@@ -137,7 +135,7 @@ const styles = StyleSheet.create({
   imageContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
-    height:100
+    height: 100,
   },
   signupImage: {
     width: 200,
@@ -152,14 +150,13 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 50,
     marginTop: -300,
   },
-
   label: {
     color: '#4A4A4A',
     marginLeft: 16,
     marginBottom: 8,
   },
-  form:{
-    padding:16
+  form: {
+    padding: 16,
   },
   input: {
     padding: 16,
@@ -216,5 +213,4 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#FFCACC',
   },
-
 });
