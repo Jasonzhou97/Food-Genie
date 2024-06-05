@@ -1,28 +1,76 @@
-import React, { useContext } from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity, Alert } from 'react-native';
+import React, { useContext, useEffect, useState } from 'react';
+import { View, Text, StyleSheet, Image, TouchableOpacity, Alert, FlatList, TextInput, Modal } from 'react-native';
 import { AuthContext } from '../../hooks/AuthContext';
 import { auth } from '../../config/firebase'; 
 import { signOut } from 'firebase/auth';
 import { useNavigation } from '@react-navigation/native';
+import { getFirestore, doc, getDoc, updateDoc } from 'firebase/firestore';
 
 export default function ProfileScreen() {
   const { user } = useContext(AuthContext);
   const navigation = useNavigation();
-  const settingsPress = () => {
-    console.log("testing");
-  }
+  const [favoriteRestaurants, setFavoriteRestaurants] = useState([]);
+  const [newRestaurant, setNewRestaurant] = useState('');
+  const [modalVisible, setModalVisible] = useState(false);
+
+  useEffect(() => {
+    const fetchFavoriteRestaurants = async () => {
+      if (user) {
+        const firestore = getFirestore();
+        const userDoc = await getDoc(doc(firestore, 'users', user.uid));
+        if (userDoc.exists()) {
+          const userData = userDoc.data();
+          setFavoriteRestaurants(userData.favoriteRestaurants || []);
+        } else {
+          console.log('User document does not exist');
+        }
+      }
+    };
+
+    fetchFavoriteRestaurants();
+  }, [user]);
+
+  const handleAddFavoriteRestaurant = async () => {
+    if (newRestaurant.trim()) {
+      try {
+        const firestore = getFirestore();
+        const userDocRef = doc(firestore, 'users', user.uid);
+
+        // Add the new restaurant to the list
+        const updatedRestaurants = [...favoriteRestaurants, newRestaurant.trim()];
+        await updateDoc(userDocRef, {
+          favoriteRestaurants: updatedRestaurants,
+        });
+
+        // Update the local state
+        setFavoriteRestaurants(updatedRestaurants);
+        setNewRestaurant('');
+        setModalVisible(false);
+        console.log('Favorite restaurant added:', newRestaurant.trim());
+      } catch (error) {
+        console.error('Error adding favorite restaurant:', error);
+        Alert.alert('Error', 'Failed to add favorite restaurant');
+      }
+    } else {
+      Alert.alert('Error', 'Please enter a restaurant name.');
+    }
+  };
+
   const handleLogout = async () => {
     try {
-      console.log("Logout button pressed"); // Add logging to verify button press
+      console.log('Logout button pressed');
       await signOut(auth);
       Alert.alert('Sign Out', 'You have been signed out successfully');
       navigation.navigate('SignUp'); 
     } catch (error) {
-      console.error('Sign Out Error:', error); // Add error logging for better debugging
+      console.error('Sign Out Error:', error);
       Alert.alert('Sign Out Error');
     }
   };
 
+  const settingsPress = () => {
+    console.log('Settings button pressed');
+  };
 
   if (!user) {
     return (
@@ -38,7 +86,7 @@ export default function ProfileScreen() {
         source={require('../../assets/images/Logo.png')}
         style={styles.profileImage}
       />
-      <Text style={styles.name}>{user.username || 'No Name Provided'}</Text>
+      <Text style={styles.name}>{user.displayName || 'No Name Provided'}</Text>
       <Text style={styles.email}>{user.email}</Text>
 
       <TouchableOpacity style={styles.button}>
@@ -52,6 +100,47 @@ export default function ProfileScreen() {
       <TouchableOpacity style={styles.button} onPress={handleLogout}>
         <Text style={styles.buttonText}>Log Out</Text>
       </TouchableOpacity>
+
+      <Text style={styles.sectionTitle}>Favorite Restaurants</Text>
+      <FlatList
+        data={favoriteRestaurants}
+        keyExtractor={(item) => item}
+        renderItem={({ item }) => (
+          <View style={styles.restaurantItem}>
+            <Text style={styles.restaurantText}>{item}</Text>
+          </View>
+        )}
+        ListEmptyComponent={<Text style={styles.noFavoritesText}>No favorite restaurants</Text>}
+      />
+
+      <TouchableOpacity style={styles.addButton} onPress={() => setModalVisible(true)}>
+        <Text style={styles.buttonText}>Add Favorite Restaurant</Text>
+      </TouchableOpacity>
+
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => {
+          setModalVisible(!modalVisible);
+        }}
+      >
+        <View style={styles.modalView}>
+          <Text style={styles.modalText}>Add a new favorite restaurant</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Restaurant Name"
+            value={newRestaurant}
+            onChangeText={setNewRestaurant}
+          />
+          <TouchableOpacity style={styles.button} onPress={handleAddFavoriteRestaurant}>
+            <Text style={styles.buttonText}>Add</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={[styles.button, styles.buttonClose]} onPress={() => setModalVisible(!modalVisible)}>
+            <Text style={styles.buttonText}>Cancel</Text>
+          </TouchableOpacity>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -88,6 +177,15 @@ const styles = StyleSheet.create({
     width: '80%',
     alignItems: 'center',
   },
+  addButton: {
+    backgroundColor: '#32CD32',
+    padding: 10,
+    borderRadius: 5,
+    marginVertical: 5,
+    width: '80%',
+    alignItems: 'center',
+    marginTop: 20,
+  },
   buttonText: {
     color: '#fff',
     fontSize: 16,
@@ -95,5 +193,60 @@ const styles = StyleSheet.create({
   message: {
     fontSize: 18,
     color: '#777',
+  },
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginTop: 20,
+    marginBottom: 10,
+  },
+  restaurantItem: {
+    padding: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ccc',
+    width: '100%',
+    alignItems: 'center',
+  },
+  restaurantText: {
+    fontSize: 16,
+    color: '#333',
+  },
+  noFavoritesText: {
+    fontSize: 16,
+    color: '#777',
+    marginTop: 10,
+  },
+  modalView: {
+    margin: 20,
+    backgroundColor: 'white',
+    borderRadius: 20,
+    padding: 35,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  modalText: {
+    marginBottom: 15,
+    textAlign: 'center',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  input: {
+    height: 40,
+    borderColor: '#ccc',
+    borderWidth: 1,
+    borderRadius: 5,
+    width: '100%',
+    paddingHorizontal: 10,
+    marginBottom: 15,
+  },
+  buttonClose: {
+    backgroundColor: '#FF6347',
   },
 });

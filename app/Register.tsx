@@ -4,7 +4,7 @@ import { useNavigation } from '@react-navigation/native';
 import { ArrowLeftIcon } from 'react-native-heroicons/solid';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../config/firebase';
-import firestore from '@react-native-firebase/firestore';
+import { getFirestore, doc, setDoc } from 'firebase/firestore';
 
 export default function SignUpScreen() {
   const navigation = useNavigation();
@@ -19,10 +19,13 @@ export default function SignUpScreen() {
         const userId = userCredential.user.uid;
 
         // Initialize Firestore with empty list of favorite restaurants
-        await firestore().collection('users').doc(userId).set({
+        const firestore = getFirestore(); // Get the Firestore instance
+        await setDoc(doc(firestore, 'users', userId), { // Use setDoc instead of firestore().collection('users').doc(userId).set
           username: username,
           email: email,
           favoriteRestaurants: [],
+          level:1,
+          points:0
         });
 
         Alert.alert('Sign Up', 'Sign up successful!', [
@@ -60,7 +63,7 @@ export default function SignUpScreen() {
       </SafeAreaView>
       <View style={styles.formContainer}>
         <View style={styles.form}>
-          <Text style={styles.label}>Full Name</Text>
+          <Text style={styles.label}>Username</Text>
           <TextInput
             style={styles.input}
             value={username}
