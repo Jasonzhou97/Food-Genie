@@ -8,10 +8,22 @@
       ]
     }
   },
+  "ios": {
+    "supportsTablet": true,
+    "bundleIdentifier": "com.yourcompany.myapp",
+    "infoPlist": {
+      "NSLocationWhenInUseUsageDescription": "We need your location to show it on the map"
+    }
+  },
+  "android": {
+    "permissions": ["ACCESS_FINE_LOCATION"],
+    "package": "com.yourcompany.myapp"
+  },
   "include": [
     "**/*.ts",
     "**/*.tsx",
     ".expo/types/**/*.ts",
     "expo-env.d.ts"
 , "app/SignUp.js"  ]
+
 }
