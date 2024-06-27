@@ -7,10 +7,12 @@ import { useNavigation } from '@react-navigation/native';
 import { getFirestore, doc, getDoc, updateDoc } from 'firebase/firestore';
 
 export default function ProfileScreen() {
-  const { user } = useContext(AuthContext);
+  const { user, setUser } = useContext(AuthContext);
   const navigation = useNavigation();
   const [favoriteRestaurants, setFavoriteRestaurants] = useState([]);
   const [newRestaurant, setNewRestaurant] = useState('');
+  const [newName, setNewName] = useState(user?.displayName || '');
+  const [editModalVisible, setEditModalVisible] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
 
   useEffect(() => {
@@ -22,7 +24,7 @@ export default function ProfileScreen() {
           const userData = userDoc.data();
           setFavoriteRestaurants(userData.favoriteRestaurants || []);
         } else {
-          console.log('User document does not exist');
+          console.log('You have not set favourite restaurants');
         }
       }
     };
@@ -60,13 +62,58 @@ export default function ProfileScreen() {
     try {
       console.log('Logout button pressed');
       await signOut(auth);
-      Alert.alert('Sign Out', 'You have been signed out successfully');
-      navigation.navigate('SignUp'); 
+      Alert.alert('Log Out', 'You have been signed out successfully');
+      navigation.navigate('Home'); 
     } catch (error) {
       console.error('Sign Out Error:', error);
       Alert.alert('Sign Out Error');
     }
   };
+
+  const editProfilePress = () => {
+    console.log('Profile Edit button pressed');
+    setEditModalVisible(true);
+  };
+
+  const handleSaveProfile = async () => {
+    console.log('handleSaveProfile called');
+    
+    if (newName.trim()) {
+      try {
+        const firestore = getFirestore();
+        const userDocRef = doc(firestore, 'users', user.uid);
+  
+        console.log('Firestore initialized');
+        console.log(`Document reference: users/${user.uid}`);
+  
+        // Update Firestore document
+        console.log('Updating Firestore document');
+        await updateDoc(userDocRef, {
+          displayName: newName.trim(),
+        });
+  
+        console.log('Firestore document updated successfully');
+  
+        // Optionally update user display name in Auth
+        console.log('Updating Firebase Auth profile');
+        await auth.currentUser.updateProfile({
+          displayName: newName.trim(),
+        });
+  
+        console.log('Firebase Auth profile updated successfully');
+  
+        setEditModalVisible(false);
+        console.log('Profile name updated:', newName.trim());
+        Alert.alert('Success', 'Profile name updated successfully');
+      } catch (error) {
+        console.error('Error updating profile name:', error);
+        Alert.alert('Error', 'Failed to update profile name');
+      }
+    } else {
+      Alert.alert('Error', 'Please enter a valid name.');
+    }
+  };
+  
 
   const settingsPress = () => {
     console.log('Settings button pressed');
@@ -75,7 +122,7 @@ export default function ProfileScreen() {
   if (!user) {
     return (
       <View style={styles.container}>
-        <Text style={styles.message}>No user is logged in</Text>
+        <Text style={styles.message}> User not logged in</Text>
       </View>
     );
   }
@@ -89,7 +136,7 @@ export default function ProfileScreen() {
       <Text style={styles.name}>{user.displayName || 'No Name Provided'}</Text>
       <Text style={styles.email}>{user.email}</Text>
 
-      <TouchableOpacity style={styles.button}>
+      <TouchableOpacity onPress={editProfilePress} style={styles.button}>
         <Text style={styles.buttonText}>Edit Profile</Text>
       </TouchableOpacity>
 
@@ -116,6 +163,32 @@ export default function ProfileScreen() {
       <TouchableOpacity style={styles.addButton} onPress={() => setModalVisible(true)}>
         <Text style={styles.buttonText}>Add Favorite Restaurant</Text>
       </TouchableOpacity>
+
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={editModalVisible}
+        onRequestClose={() => {
+          setEditModalVisible(!editModalVisible);
+      }}
+      >
+      <View style={styles.modalView}>
+      <Text style={styles.modalText}>Edit Profile Name</Text>
+      <TextInput
+        style={styles.input}
+        placeholder="New Name"
+        value={newName}
+        onChangeText={setNewName}
+      />
+      <TouchableOpacity style={styles.button} onPress={handleSaveProfile}>
+        <Text style={styles.buttonText}>Save</Text>
+      </TouchableOpacity>
+      <TouchableOpacity style={[styles.button, styles.buttonClose]} onPress={() => setEditModalVisible(!editModalVisible)}>
+        <Text style={styles.buttonText}>Cancel</Text>
+      </TouchableOpacity>
+      </View>
+      </Modal>
+
 
       <Modal
         animationType="slide"
@@ -217,6 +290,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   modalView: {
+    marginTop: 300,
     margin: 20,
     backgroundColor: 'white',
     borderRadius: 20,

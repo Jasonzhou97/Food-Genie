@@ -17,7 +17,7 @@ const App = () => {
       let location = await Location.getCurrentPositionAsync({});
       setCurrentPosition({
         latitude:location.coords.latitude,
-        longitude: ocation.coords.longitude,
+        longitude: location.coords.longitude,
       });
     })();
   }, []);
