@@ -101,6 +101,13 @@ export default function ProfileScreen() {
         });
   
         console.log('Firebase Auth profile updated successfully');
+
+        // Update the local user context with the new name
+        const updatedUser = {
+          ...user,
+          displayName: newName.trim(),
+        };
+        setUser(updatedUser);
   
         setEditModalVisible(false);
         console.log('Profile name updated:', newName.trim());
@@ -113,6 +120,7 @@ export default function ProfileScreen() {
       Alert.alert('Error', 'Please enter a valid name.');
     }
   };
+
   
 
   const settingsPress = () => {

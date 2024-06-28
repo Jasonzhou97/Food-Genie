@@ -1,4 +1,4 @@
-import { Image, StyleSheet, Platform,View, TouchableOpacity,Dimensions,Text } from 'react-native';
+import { Image, StyleSheet, Platform, View, TouchableOpacity,Dimensions,Text } from 'react-native';
 import { SearchBar } from 'react-native-screens';
 import { HelloWave } from '@/components/HelloWave';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
@@ -10,12 +10,14 @@ import { Searchbar } from 'react-native-paper';
 import { Ionicons } from '@expo/vector-icons';
 import ImageCarousel from '@/components/Carousel'
 import { useNavigation} from '@react-navigation/native'
+import { query } from 'firebase/firestore';
 
 export default function HomeScreen() {
   const navigation = useNavigation();
   const width = Dimensions.get('window').width;
   //search bar state management
   const [searchQuery, setSearchQuery] = useState('');
+
   return (
     <ParallaxScrollView
       headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
@@ -32,12 +34,13 @@ export default function HomeScreen() {
 
         <View style={styles.searchContainer}>
           <Searchbar
-      placeholder="Search"
-      onChangeText={setSearchQuery}
-      value={searchQuery}
-      style={styles.searchBar}
-        />
-        
+            placeholder="Search"
+            onChangeText={setSearchQuery}
+            value={searchQuery}
+            style={styles.searchBar}
+            onSubmitEditing={() => navigation.navigate("map", { query: searchQuery })}
+              />
+              
         <TouchableOpacity onPress={()=>navigation.navigate("SignUp")}>
         <Ionicons name="person-circle-outline" size={40} color="black" style={styles.profileIcon} />
         </TouchableOpacity>

@@ -33,7 +33,7 @@ export default function RootLayout() {
           <Stack.Screen name="(tabs)" options={{ headerShown: true, title: 'FoodGenie' }} />
           <Stack.Screen name="Login" options={{ headerShown: false }} />
           <Stack.Screen name="Register" options={{ headerShown: false }} />
-          <Stack.Screen name="profile" options={{ headerShown: false }} />
+          {/* <Stack.Screen name="profile" options={{ headerShown: false }} /> */}
           <Stack.Screen name="+not-found" />
         </Stack>
       </ThemeProvider>
