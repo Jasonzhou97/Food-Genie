@@ -36,12 +36,7 @@
     "nativewind": "^2.0.11",
     "react": "^18.2.0",
     "react-dom": "18.2.0",
-<<<<<<< HEAD
-    "react-native": "0.74.1",
-    "react-native-feather": "^1.1.2",
-=======
     "react-native": "^0.74.2",
->>>>>>> cc600f7459347fb67fa3b52e059bd06bb4382b23
     "react-native-gesture-handler": "~2.16.1",
     "react-native-google-places-autocomplete": "^2.5.6",
     "react-native-heroicons": "^4.0.0",
