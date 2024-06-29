@@ -33,8 +33,12 @@ export default function RootLayout() {
           <Stack.Screen name="(tabs)" options={{ headerShown: true, title: 'FoodGenie' }} />
           <Stack.Screen name="Login" options={{ headerShown: false }} />
           <Stack.Screen name="Register" options={{ headerShown: false }} />
+<<<<<<< HEAD
+          {/* <Stack.Screen name="profile" options={{ headerShown: false }} /> */}
+=======
           <Stack.Screen name="profile" options={{ headerShown: false }} />
           <Stack.Screen name="Restaurant" options={{ headerShown: false }} />
+>>>>>>> 16c9f9e6af4e151ae9ad22e4909a40dded2378a0
           <Stack.Screen name="+not-found" />
         </Stack>
       </ThemeProvider>

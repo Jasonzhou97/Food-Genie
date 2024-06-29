@@ -19,8 +19,8 @@ export default function RestaurantPg({ item }) {
                     </Text>
                 </View>
             </View>
-            <View style={tw`flex-row psace-x-1 items-center`}>
-                <Text style={tw`gray-gray-700 text-xs`}>Nearby {item.address}</Text>
+            <View style={tw`flex-row space-x-1 items-center`}>
+                <Text style={tw`text-gray-700 text-xs`}>Nearby {item.address}</Text>
             </View>
         </TouchableWithoutFeedback>
     );
