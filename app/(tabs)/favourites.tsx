@@ -2,7 +2,6 @@ import React, { useContext, useEffect, useState } from 'react';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { Alert,StyleSheet, Image, Platform,Text,View,FlatList,TouchableOpacity} from 'react-native';
 import { AuthContext } from '../../hooks/AuthContext';
-import React, { useContext, useEffect, useState } from 'react';
 import { getFirestore, doc, getDoc } from 'firebase/firestore';
 import { useNavigation } from '@react-navigation/native';
 import axios from 'axios';
