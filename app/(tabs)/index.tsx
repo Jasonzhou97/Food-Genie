@@ -12,6 +12,7 @@ import ImageCarousel from '@/components/Carousel'
 import { useNavigation} from '@react-navigation/native'
 import { AuthContext } from '../../hooks/AuthContext';
 import { useContext } from 'react';
+import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
 
 export default function HomeScreen() {
   const navigation = useNavigation();
@@ -42,10 +43,11 @@ export default function HomeScreen() {
 
         <View style={styles.searchContainer}>
           <Searchbar
-      placeholder="Search"
-      onChangeText={setSearchQuery}
-      value={searchQuery}
-      style={styles.searchBar}
+           placeholder="Search"
+           onChangeText={setSearchQuery}
+           value={searchQuery}
+           style={styles.searchBar}
+           onSubmitEditing={() => navigation.navigate("map", { query: searchQuery })}
         />
         
         <TouchableOpacity onPress={()=>iconPress()}>

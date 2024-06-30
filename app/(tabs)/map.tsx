@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, StyleSheet, Text } from 'react-native';
+import { View, StyleSheet, Text, Image } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import * as Location from 'expo-location';
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
@@ -28,6 +28,7 @@ const Map = () => {
     })();
   }, []);
 
+
   const onPlaceSelected = (data, details = null) => {
     if (details) {
       const { lat, lng } = details.geometry.location;
@@ -42,15 +43,6 @@ const Map = () => {
       mapRef.current.animateToRegion(position, 1000);
     }
   };
-
-  useEffect(() => {
-    if (route && route.params && route.params.query) {
-      // Handle search query passed from home screen
-      // You can use the query value to perform specific actions
-      // For example, you might want to set markers or search for a specific location
-      console.log('Search query from home screen:', route.params.query);
-    }
-  }, [route]);
 
   return (
     <View style={{ flex: 1 }}>
@@ -80,8 +72,13 @@ const Map = () => {
         region={currentPosition}
       >
         {currentPosition && (
-          <Marker coordinate={currentPosition}>
-            <Text style={{ fontSize: 24 }}>📍</Text>
+          <Marker coordinate={currentPosition} >
+              <View style={styles.markerContainer}>
+                <View style={styles.avatarContainer}>
+                  <Image source={require('@/assets/images/avatar_1.png')} style={styles.avatar} />
+                </View>
+                <Text style={{ fontSize: 24 }}>📍</Text>
+              </View>
           </Marker>
         )}
       </MapView>
@@ -104,6 +101,29 @@ const styles = StyleSheet.create({
     borderRadius: 50,
     backgroundColor: '#FFF',
     elevation: 5,
+  },
+  markerContainer: {
+    flexDirection: 'column',
+    alignItems: 'center',
+  },
+  avatarContainer: {
+    marginLeft: 20,
+    borderWidth: 2,
+    borderColor: '#fff',
+    borderRadius: 25,
+    overflow: 'hidden',
+    padding: 5,
+    backgroundColor: '#fff',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.8,
+    shadowRadius: 2,
+    elevation: 5,
+  },
+  avatar: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
   },
 });
 

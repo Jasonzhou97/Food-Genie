@@ -18,7 +18,7 @@ export default function LoginScreen() {
         Alert.alert('Sign In', 'Sign in successful!', [
           {
             text: 'OK',
-            onPress: () => navigation.navigate('profile'), // Change 'Home' to your desired screen
+            onPress: () => navigation.navigate('profile'), 
           },
         ]);
       } catch (err) {

@@ -29,17 +29,16 @@ export default function HomeScreen() {
         />
       }>
 
-
       <View style={styles.mainContainer}>
-
         <View style={styles.searchContainer}>
+        
           <Searchbar
             placeholder="Search"
             onChangeText={setSearchQuery}
             value={searchQuery}
             style={styles.searchBar}
-            onSubmitEditing={() => navigation.navigate("map", { query: searchQuery })}
-              />
+            />
+          
               
         <TouchableOpacity onPress={()=>navigation.navigate("SignUp")}>
         <Ionicons name="person-circle-outline" size={40} color="black" style={styles.profileIcon} />
@@ -84,6 +83,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     paddingHorizontal: 16,
     paddingTop: 16,
+  },
+  searchIcon: {
+    marginLeft:20,
+
   },
   profileIcon:{
     marginLeft:10,
