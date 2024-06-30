@@ -6,6 +6,7 @@ import { useEffect } from 'react';
 import 'react-native-reanimated';
 import { AuthProvider } from '../hooks/AuthContext'; // Ensure correct path
 import { useColorScheme } from '@/hooks/useColorScheme';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -27,17 +28,19 @@ export default function RootLayout() {
   }
 
   return (
+    <GestureHandlerRootView style={{ flex: 1 }}>
     <AuthProvider>
       <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
         <Stack>
           <Stack.Screen name="(tabs)" options={{ headerShown: true, title: 'FoodGenie' }} />
           <Stack.Screen name="Login" options={{ headerShown: false }} />
           <Stack.Screen name="Register" options={{ headerShown: false }} />
-          {/* <Stack.Screen name="profile" options={{ headerShown: false }} /> */}
+          <Stack.Screen name="profile" options={{ headerShown: false }} />
           <Stack.Screen name="Restaurant" options={{ headerShown: false }} />
           <Stack.Screen name="+not-found" />
         </Stack>
       </ThemeProvider>
     </AuthProvider>
+    </GestureHandlerRootView>
   );
 }

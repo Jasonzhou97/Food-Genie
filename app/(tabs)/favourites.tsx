@@ -1,96 +1,154 @@
 import React, { useContext, useEffect, useState } from 'react';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { StyleSheet, FlatList, Text, View, Image } from 'react-native';
+import { Alert,StyleSheet, Image, Platform,Text,View,FlatList,TouchableOpacity} from 'react-native';
+import { AuthContext } from '../../hooks/AuthContext';
+import React, { useContext, useEffect, useState } from 'react';
 import { getFirestore, doc, getDoc } from 'firebase/firestore';
-import { AuthContext } from '@/hooks/AuthContext'; // Ensure you have the correct path to AuthContext
+import { useNavigation } from '@react-navigation/native';
+import axios from 'axios';
 
+export default function favouritesScreen() {
+  const {user} = useContext(AuthContext);
+  const [favRestaurants,setFavRestaurants] = useState('');
+  const navigation = useNavigation();
 
-export default function TabTwoScreen() {
-  const { user } = useContext(AuthContext);
-  const [favoriteRestaurants, setFavoriteRestaurants] = useState([]);
+  const [output,setOutput] = useState('');
 
-  useEffect(() => {
-    const fetchFavoriteRestaurants = async () => {
-      if (user) {
-        try {
-          const firestore = getFirestore();
-          const userDoc = await getDoc(doc(firestore, 'users', user.uid));
-          if (userDoc.exists()) {
-            const userData = userDoc.data();
-            setFavoriteRestaurants(userData.favoriteRestaurants || []);
-          } else {
-            console.log('User document does not exist');
-          }
-        } catch (error) {
-          console.error('Error fetching favorite restaurants:', error);
+  useEffect(()=>{
+    const fetchFavoriteRestaurants = async() =>{
+      if(user){
+        const firestore = getFirestore();
+        const userDoc = await getDoc(doc(firestore,'users',user.uid));
+        if(userDoc.exists()){
+          const userData = userDoc.data();
+          setFavRestaurants(userData.favoriteRestaurants||[]);
+        }
+        else{
+          console.log('User document does not exist')
         }
       }
     };
-
     fetchFavoriteRestaurants();
-  }, [user]);
 
-  const renderItem = ({ item }) => (
-    <View style={styles.restaurantItem}>
-      <Text style={styles.restaurantText}>{item}</Text>
-    </View>
-  );
+  },[user]);
+          
+  console.log(favRestaurants);
+  const recButton = async () =>{
+    try {
+      const userInput = `Based on these favorite restaurants: ${favRestaurants.join(", ")}, recommend me restaurants or cuisine styles.`;
+      const response = await axios.post(
+        'https://api.openai.com/v1/chat/completions',
+        {
+          model: "gpt-3.5-turbo",
+          messages: [{ role: "user", content: userInput }],
+          temperature: 0.7,
+        },
+        {
+          headers: {
+            'Authorization': `Bearer sk-proj-taAkgo9f4Dbd088NclcWT3BlbkFJrm2wuyGiwKwMIvCiG6q6`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
 
-  const ListHeaderComponent = () => (
-    <View style={styles.headerContainer}>
-      <Ionicons size={310} name="code-slash" style={styles.headerImage} />
-    </View>
-  );
+      if (response.data && response.data.choices && response.data.choices.length > 0) {
+        const rec = response.data.choices[0].message.content?.trim() || 'No recommendations found';
+        setOutput(rec);
+        Alert.alert('Recommendations', rec);
+      } else {
+        console.error('Empty or invalid response from OpenAI API:', response);
+        Alert.alert('Error', 'Failed to fetch recommendations: Empty or invalid response');
+      }
+    } catch (error) {
+      console.error('Error fetching recommendations:', error);
+      Alert.alert('Error', 'Failed to fetch recommendations');
+    }
+  };
+  
+  /*
+  const recButton = async ()=>{
+    try{
+      const res = await fetch("http://localhost:5000/recommend",{
+        method:"POST",
+        headers:{
+          'Content-Type': 'application/json',
+        },
+        body:JSON.stringify({
+          favorites:favRestaurants
+        })
+      });
 
+      const textResponse = await res.json();
+      console.log('Server response:', textResponse); // Log the raw response for debugging
+      const result = JSON.parse(textResponse);
+      if (res.ok) {
+        Alert.alert('Recommendations', result.recommendations);
+      } else {
+        Alert.alert('Error', result.error);
+      }
+    } catch (error) {
+      console.error('Error fetching recommendations:', error);
+      Alert.alert('Error', 'Failed to fetch recommendations');
+    }
+
+  }
+*/
   return (
     <View style={styles.container}>
-      <FlatList
-        data={favoriteRestaurants}
-        keyExtractor={(item, index) => index.toString()}
-        renderItem={renderItem}
-        ListHeaderComponent={ListHeaderComponent}
-        ListEmptyComponent={<Text style={styles.noFavoritesText}>No favorite restaurants</Text>}
-      />
+      <Text style={styles.sectionHead}> Your Favourite Restaurants</Text>
+      <FlatList data={favRestaurants}
+      renderItem={({item}) => (
+        <View style={styles.restaurantItem}>
+          <Text style={styles.restaurantText}>{item}</Text>
+        </View>
+      )}
+      ListEmptyComponent={<Text style={styles.noFavText}>No favorite restaurants</Text>}
+    />
+    <TouchableOpacity style={styles.button} onPress={recButton}>
+      <Text style={styles.buttonText}>Recommend Restaurants</Text>
+    </TouchableOpacity>
     </View>
-  );
-}
+);
+    }
+  
+  
+
 
 const styles = StyleSheet.create({
-  tinyLogo: {
-    width: 50,
-    height: 50,
-  },
-  logo: {
-    width: 66,
-    height: 58,
-  },
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
-  headerContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#D0D0D0', // Adjust according to the theme
-    padding: 20,
-  },
-  headerImage: {
-    color: '#808080',
-  },
-  restaurantItem: {
-    padding: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
-    backgroundColor: '#fff',
-  },
-  restaurantText: {
-    fontSize: 16,
-    color: '#333',
-  },
-  noFavoritesText: {
-    fontSize: 16,
-    color: '#777',
-    textAlign: 'center',
-    marginTop: 20,
-  },
+    container:{
+      flex:1,
+      padding:20,
+      backgroundColor:'#fff',
+    },
+    sectionHead:{
+      fontSize:20,
+    fontWeight:'bold',
+    marginBottom:10,
+    },
+    restaurantItem:{
+      padding:10,
+      borderBottomWidth:1,
+      borderBottomColor:'#ccc',
+      width:'100%',
+    },
+    restaurantText:{
+      fontSize: 16,
+    color:'#333',
+    },
+    noFavText: {
+      fontSize:16,
+      color:'#777',
+      marginTop:10,
+    },
+    button: {
+      backgroundColor: '#1E90FF',
+      padding: 10,
+      borderRadius: 5,
+      marginTop: 20,
+      alignItems: 'center',
+    },
+    buttonText: {
+      color: '#fff',
+      fontSize: 16,
+    },
 });
