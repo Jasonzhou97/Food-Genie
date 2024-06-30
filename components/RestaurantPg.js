@@ -2,12 +2,12 @@ import { View, Text, Image } from 'react-native';
 import React from 'react';
 import { TouchableWithoutFeedback } from 'react-native-gesture-handler';
 import tw from 'twrnc';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { useNavigation} from '@react-navigation/native'
+import { useNavigation } from '@react-navigation/native';
+
 export default function RestaurantPg({ item }) {
     const navigation = useNavigation();
     return (
-        <TouchableWithoutFeedback onPress={()=>navigation.navigate('Restaurant')}>
+        <TouchableWithoutFeedback onPress={() => navigation.navigate('Restaurant', item)}>
             <View style={tw`shadow-lg mr-6 bg-white rounded-3xl`}>
                 <Image style={tw`h-36 w-64 rounded-t-3xl`} source={item.image} />
                 <Text style={tw`text-lg font-semibold`}>{item.name}</Text>

@@ -6,6 +6,7 @@ import {index} from './app/index'
 import {Login} from './app/login'
 import {SignUp} from './app/SignUp'
 import {Register} from './app/register'
+import {Map} from './app/map'
 
 
 
@@ -19,6 +20,7 @@ export default function AppNavigation() {
           <Stack.Screen name="Login" options={{headerShown: false}} component={Login} />
           <Stack.Screen name="SignUp" options={{headerShown: false}} component={SignUp} />
           <Stack.Screen name="Register" options={{headerShown: false}} component={Register} />
+          <Stack.Screen name="Map" options={{headerShown: false}} component={Map} />
         </Stack.Navigator>
       </NavigationContainer>
     )
