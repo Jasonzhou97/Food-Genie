@@ -8,8 +8,7 @@
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "plugins": [
-      "@react-native-firebase/app",
-      "@react-native-firebase/firestore"
+      "expo-router"
     ],
     "splash": {
       "image": "./assets/images/splash.png",
@@ -32,9 +31,6 @@
       "output": "static",
       "favicon": "./assets/images/favicon.png"
     },
-    "plugins": [
-      "expo-router"
-    ],
     "experiments": {
       "typedRoutes": true
     },
@@ -43,7 +39,7 @@
         "origin": false
       },
       "eas": {
-        "projectId": "fc3ef224-46a0-4df7-b1cf-9c0d05c8a749"
+        "projectId": "498df6c2-5ecf-4152-a47e-f0ca5d3c8558"
       }
     }
   }
