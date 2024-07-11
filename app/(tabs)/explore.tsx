@@ -5,9 +5,13 @@ import tw from 'twrnc';
 import FeatRow from '@/components/FeatRow';
 import { cuisines, featured } from '../../constants/cuisines';
 
-export default function TabTwoScreen() {
+export default function ExploreScreen() {
   const [activeCuisine, setActiveCuisine] = useState(null);
+  const filteredRest = featured.restaurants.filter(restaurant => activeCuisine?restaurant.cuisineID==activeCuisine:true);
 
+  const handleCuisinePress = (cuisineId) => {
+    setActiveCuisine(prevCuisine => prevCuisine === cuisineId ? null : cuisineId);
+  };
   return (
     <GestureHandlerRootView style={styles.container}>
       <ScrollView>
@@ -22,7 +26,7 @@ export default function TabTwoScreen() {
               return (
                 <View key={index} style={tw`flex mr-6 justify-center items-center`}>
                   <TouchableOpacity
-                    onPress={() => setActiveCuisine(cuisine.id)}
+                    onPress={() => handleCuisinePress(cuisine.id)}
                     style={tw`p-2 rounded-full ${isActive ? 'bg-gray-700' : 'bg-gray-200'}`}
                   >
                     <Image style={{ width: 45, height: 45 }} source={cuisine.image} />
@@ -40,7 +44,7 @@ export default function TabTwoScreen() {
             <FeatRow
               key={index}
               title={item.title}
-              restaurants={item.restaurants}
+              restaurants={filteredRest}
               description={item.description}
             />
           ))}
