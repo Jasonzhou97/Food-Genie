@@ -9,6 +9,8 @@ const Map = () => {
   const route = useRoute();
   const [currentPosition, setCurrentPosition] = useState(null);
   const mapRef = useRef(null);
+  const googlePlacesRef = useRef(null);
+  const searchQuery = route.params?.query;
 
   useEffect(() => {
     (async () => {
@@ -28,6 +30,11 @@ const Map = () => {
     })();
   }, []);
 
+  useEffect(() => {
+    if (searchQuery && googlePlacesRef.current) {
+      googlePlacesRef.current.setAddressText(searchQuery);
+    }
+  }, [searchQuery]);
 
   const onPlaceSelected = (data, details = null) => {
     if (details) {
@@ -37,7 +44,7 @@ const Map = () => {
         longitude: lng,
         latitudeDelta: 0.0922,
         longitudeDelta: 0.0421,
-     };
+      };
 
       setCurrentPosition(position);
       mapRef.current.animateToRegion(position, 1000);
@@ -47,7 +54,8 @@ const Map = () => {
   return (
     <View style={{ flex: 1 }}>
       <GooglePlacesAutocomplete
-        placeholder='Search'
+        ref={googlePlacesRef}
+        placeholder="Search"
         fetchDetails={true}
         onPress={onPlaceSelected}
         query={{
@@ -72,13 +80,13 @@ const Map = () => {
         region={currentPosition}
       >
         {currentPosition && (
-          <Marker coordinate={currentPosition} >
-              <View style={styles.markerContainer}>
-                <View style={styles.avatarContainer}>
-                  <Image source={require('@/assets/images/avatar_1.png')} style={styles.avatar} />
-                </View>
-                <Text style={{ fontSize: 24 }}>📍</Text>
+          <Marker coordinate={currentPosition}>
+            <View style={styles.markerContainer}>
+              <View style={styles.avatarContainer}>
+                <Image source={require('@/assets/images/avatar_1.png')} style={styles.avatar} />
               </View>
+              <Text style={{ fontSize: 24 }}>📍</Text>
+            </View>
           </Marker>
         )}
       </MapView>
