@@ -1,17 +1,42 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, StyleSheet, Text, Image } from 'react-native';
+import { View, StyleSheet, Text, Image, Alert, Button } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import * as Location from 'expo-location';
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
 import { useRoute } from '@react-navigation/native';
+import { getFirestore, doc, updateDoc, collection, getDocs, addDoc } from 'firebase/firestore';
+import { auth } from '../../config/firebase';
 
 const Map = () => {
   const route = useRoute();
   const [currentPosition, setCurrentPosition] = useState(null);
+  const [userLocations, setUserLocations] = useState([]);
+  const [selectedLocation, setSelectedLocation] = useState(null);
   const mapRef = useRef(null);
   const googlePlacesRef = useRef(null);
   const searchQuery = route.params?.query;
 
+  // Function to update user location in Firestore
+  const updateUserLoc = async (latitude, longitude) => {
+    const firestore = getFirestore();
+    const user = auth.currentUser;
+
+    if (user) {
+      try {
+        const userDocRef = doc(firestore, 'users', user.uid);
+        await updateDoc(userDocRef, {
+          lastKnownLoc: {
+            latitude: latitude,
+            longitude: longitude
+          }
+        });
+      } catch (error) {
+        console.error('Error updating location:', error.message);
+      }
+    }
+  };
+
+  // Fetch current user's location on component mount
   useEffect(() => {
     (async () => {
       let { status } = await Location.requestForegroundPermissionsAsync();
@@ -21,21 +46,48 @@ const Map = () => {
       }
 
       let location = await Location.getCurrentPositionAsync({});
+      const { latitude, longitude } = location.coords;
       setCurrentPosition({
-        latitude: location.coords.latitude,
-        longitude: location.coords.longitude,
+        latitude,
+        longitude,
         latitudeDelta: 0.0922,
         longitudeDelta: 0.0421,
       });
+      updateUserLoc(latitude, longitude);
     })();
   }, []);
 
+  // Fetch other users' locations from Firestore
+  useEffect(() => {
+    const fetchUserLocations = async () => {
+      const firestore = getFirestore();
+      const usersCollection = collection(firestore, 'users');
+      const userDocs = await getDocs(usersCollection);
+
+      const locations = userDocs.docs.map(doc => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          ...data.lastKnownLoc, // Adjust according to your Firestore schema
+          avatarUrl: data.avatarUrl, // Assuming avatarUrl exists in your data
+        };
+      });
+
+      console.log("Fetched user locations: ", locations); // Debugging: Log the fetched locations
+      setUserLocations(locations);
+    };
+
+    fetchUserLocations();
+  }, []);
+
+  // Handle search query change
   useEffect(() => {
     if (searchQuery && googlePlacesRef.current) {
       googlePlacesRef.current.setAddressText(searchQuery);
     }
   }, [searchQuery]);
 
+  // Handle selection of a place from Google Places Autocomplete
   const onPlaceSelected = (data, details = null) => {
     if (details) {
       const { lat, lng } = details.geometry.location;
@@ -51,8 +103,46 @@ const Map = () => {
     }
   };
 
+  // Handle map taps
+  const handleMapPress = (event) => {
+    const { latitude, longitude } = event.nativeEvent.coordinate;
+    setSelectedLocation({ latitude, longitude });
+    Alert.alert(
+      "Add Favorite Restaurant",
+      "Do you want to add this location to your favorite restaurants?",
+      [
+        {
+          text: "Cancel",
+          style: "cancel"
+        },
+        { text: "OK", onPress: () => saveFavoriteRestaurant(latitude, longitude) }
+      ]
+    );
+  };
+
+  // Save favorite restaurant to Firestore
+  const saveFavoriteRestaurant = async (latitude, longitude) => {
+    const firestore = getFirestore();
+    const user = auth.currentUser;
+
+    if (user) {
+      try {
+        const favoritesCollection = collection(firestore, `users/${user.uid}/favoriteRestaurants`);
+        await addDoc(favoritesCollection, {
+          latitude,
+          longitude,
+          addedAt: new Date()
+        });
+        Alert.alert("Success", "The location has been added to your favorite restaurants.");
+      } catch (error) {
+        console.error('Error adding favorite restaurant:', error.message);
+      }
+    }
+  };
+
   return (
     <View style={{ flex: 1 }}>
+      {/* Google Places Autocomplete */}
       <GooglePlacesAutocomplete
         ref={googlePlacesRef}
         placeholder="Search"
@@ -68,6 +158,7 @@ const Map = () => {
         }}
       />
 
+      {/* MapView */}
       <MapView
         ref={mapRef}
         style={{ flex: 1 }}
@@ -78,10 +169,13 @@ const Map = () => {
           longitudeDelta: 0.0421,
         }}
         region={currentPosition}
+        onPress={handleMapPress} // Handle map press
       >
+        {/* Render current user marker */}
         {currentPosition && (
           <Marker coordinate={currentPosition}>
             <View style={styles.markerContainer}>
+              {/* Adjust avatar rendering */}
               <View style={styles.avatarContainer}>
                 <Image source={require('@/assets/images/avatar_1.png')} style={styles.avatar} />
               </View>
@@ -89,6 +183,21 @@ const Map = () => {
             </View>
           </Marker>
         )}
+
+        {/* Render other users' markers */}
+        {userLocations.map((user, index) => (
+          <Marker
+            key={index}
+            coordinate={{ latitude: user.latitude, longitude: user.longitude }}
+          >
+            <View style={styles.markerContainer}>
+              <View style={styles.avatarContainer}>
+                <Image source={{ uri: user.avatarUrl }} style={styles.avatar} />
+              </View>
+              <Text style={{ fontSize: 24 }}>📍</Text>
+            </View>
+          </Marker>
+        ))}
       </MapView>
     </View>
   );

@@ -1,10 +1,11 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity, Alert, FlatList, TextInput, Modal } from 'react-native';
+import { View, Text, StyleSheet, Image, TouchableOpacity, Alert, FlatList, TextInput, Modal, Button } from 'react-native';
 import { AuthContext } from '../../hooks/AuthContext';
 import { auth } from '../../config/firebase'; 
-import { signOut } from 'firebase/auth';
+import { signOut, updateProfile } from 'firebase/auth';
 import { useNavigation } from '@react-navigation/native';
-import { getFirestore, doc, getDoc, updateDoc } from 'firebase/firestore';
+import { getFirestore, collection, getDocs, addDoc, doc, updateDoc } from 'firebase/firestore';
+import { launchImageLibrary } from 'react-native-image-picker';
 
 export default function ProfileScreen() {
   const { user, setUser } = useContext(AuthContext);
@@ -14,18 +15,17 @@ export default function ProfileScreen() {
   const [newName, setNewName] = useState(user?.displayName || '');
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
+  const [avatarSource, setAvatarSource] = useState(null);
 
   useEffect(() => {
     const fetchFavoriteRestaurants = async () => {
       if (user) {
         const firestore = getFirestore();
-        const userDoc = await getDoc(doc(firestore, 'users', user.uid));
-        if (userDoc.exists()) {
-          const userData = userDoc.data();
-          setFavoriteRestaurants(userData.favoriteRestaurants || []);
-        } else {
-          console.log('You have not set favourite restaurants');
-        }
+        const favoritesCollection = collection(firestore, `users/${user.uid}/favoriteRestaurants`);
+        const favoritesSnapshot = await getDocs(favoritesCollection);
+
+        const favoriteRestaurantsList = favoritesSnapshot.docs.map(doc => doc.data());
+        setFavoriteRestaurants(favoriteRestaurantsList);
       }
     };
 
@@ -36,16 +36,16 @@ export default function ProfileScreen() {
     if (newRestaurant.trim()) {
       try {
         const firestore = getFirestore();
-        const userDocRef = doc(firestore, 'users', user.uid);
+        const favoritesCollection = collection(firestore, `users/${user.uid}/favoriteRestaurants`);
 
-        // Add the new restaurant to the list
-        const updatedRestaurants = [...favoriteRestaurants, newRestaurant.trim()];
-        await updateDoc(userDocRef, {
-          favoriteRestaurants: updatedRestaurants,
+        // Add the new restaurant to the subcollection
+        await addDoc(favoritesCollection, {
+          name: newRestaurant.trim(),
+          addedAt: new Date()
         });
 
         // Update the local state
-        setFavoriteRestaurants(updatedRestaurants);
+        setFavoriteRestaurants(prev => [...prev, { name: newRestaurant.trim() }]);
         setNewRestaurant('');
         setModalVisible(false);
         console.log('Favorite restaurant added:', newRestaurant.trim());
@@ -75,6 +75,26 @@ export default function ProfileScreen() {
     setEditModalVisible(true);
   };
 
+  const handleChoosePic = () =>{
+    const options ={
+        mediaType:'photo',
+        maxWidth: 150,
+        maxHeight: 150,
+        quality: 1,
+    };
+    launchImageLibrary(options, (response) => {
+        if (response.didCancel) {
+          console.log('User cancelled image picker');
+        } else if (response.error) {
+          console.error('ImagePicker Error:', response.error);
+          Alert.alert('Error', 'Failed to pick an image');
+        } else {
+          // Set the selected image URI to state
+          setAvatarSource(response.uri);
+        }
+      });
+    };
+
   const handleSaveProfile = async () => {
     console.log('handleSaveProfile called');
     
@@ -89,14 +109,14 @@ export default function ProfileScreen() {
         // Update Firestore document
         console.log('Updating Firestore document');
         await updateDoc(userDocRef, {
-          displayName: newName.trim(),
+          username: newName.trim(),
         });
   
         console.log('Firestore document updated successfully');
   
-        // Optionally update user display name in Auth
+        // Update Firebase Auth profile
         console.log('Updating Firebase Auth profile');
-        await auth.currentUser.updateProfile({
+        await updateProfile(auth.currentUser, {
           displayName: newName.trim(),
         });
   
@@ -121,12 +141,6 @@ export default function ProfileScreen() {
     }
   };
 
-  
-
-  const settingsPress = () => {
-    console.log('Settings button pressed');
-  };
-
   if (!user) {
     return (
       <View style={styles.container}>
@@ -134,6 +148,7 @@ export default function ProfileScreen() {
       </View>
     );
   }
+
 
   return (
     <View style={styles.container}>
@@ -148,8 +163,8 @@ export default function ProfileScreen() {
         <Text style={styles.buttonText}>Edit Profile</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity onPress={settingsPress} style={styles.button}>
-        <Text style={styles.buttonText}>Settings</Text>
+      <TouchableOpacity onPress={handleChoosePic} style={styles.button}>
+        <Text style={styles.buttonText}>Profile Picture</Text>
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.button} onPress={handleLogout}>
@@ -225,7 +240,6 @@ export default function ProfileScreen() {
     </View>
   );
 }
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -332,3 +346,4 @@ const styles = StyleSheet.create({
     backgroundColor: '#FF6347',
   },
 });
+ 

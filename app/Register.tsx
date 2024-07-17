@@ -25,8 +25,16 @@ export default function SignUpScreen() {
           email: email,
           favoriteRestaurants: [],
           level:1,
-          points:0
+          points:0,
+          avatarURL:"https://awakenbread.sgp1.cdn.digitaloceanspaces.com/08.JPG",
+          //set default loc to random place in central sg
+          lastKnownLoc: {
+            latitude: 1.3521,
+            longitude: 103.8198 
+          },
+          avatarUrl: '../assets/images/login.jpeg' // Default avatar URL
         });
+        
 
         Alert.alert('Sign Up', 'Sign up successful!', [
           {
