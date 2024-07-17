@@ -1,227 +1,305 @@
-import React, { useState } from 'react';
-import { StyleSheet, Image, View, Text, TouchableOpacity, TextInput, Alert, SafeAreaView } from 'react-native';
+import React, { useContext, useEffect, useState } from 'react';
+import { View, Text, StyleSheet, Image, TouchableOpacity, Alert, FlatList, TextInput, Modal, Button } from 'react-native';
+import { AuthContext } from '../hooks/AuthContext';
+import { auth } from '../config/firebase'; 
+import { signOut, updateProfile } from 'firebase/auth';
 import { useNavigation } from '@react-navigation/native';
-import { ArrowLeftIcon } from 'react-native-heroicons/solid';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '../config/firebase';
-import { getFirestore, doc, setDoc } from 'firebase/firestore';
+import { getFirestore, collection, getDocs, addDoc, doc, updateDoc } from 'firebase/firestore';
+import { launchImageLibrary } from 'react-native-image-picker';
 
-export default function SignUpScreen() {
+export default function ProfileScreen() {
+  const { user, setUser } = useContext(AuthContext);
   const navigation = useNavigation();
-  const [username, setUsername] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [favoriteRestaurants, setFavoriteRestaurants] = useState([]);
+  const [newRestaurant, setNewRestaurant] = useState('');
+  const [newName, setNewName] = useState(user?.displayName || '');
+  const [editModalVisible, setEditModalVisible] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [avatarSource, setAvatarSource] = useState(null);
 
-  const submit = async () => {
-    if (email && password) {
+  useEffect(() => {
+    const fetchFavoriteRestaurants = async () => {
+      if (user) {
+        const firestore = getFirestore();
+        const favoritesCollection = collection(firestore, `users/${user.uid}/favoriteRestaurants`);
+        const favoritesSnapshot = await getDocs(favoritesCollection);
+
+        const favoriteRestaurantsList = favoritesSnapshot.docs.map(doc => doc.data());
+        setFavoriteRestaurants(favoriteRestaurantsList);
+      }
+    };
+
+    fetchFavoriteRestaurants();
+  }, [user]);
+
+  const handleAddFavoriteRestaurant = async () => {
+    if (newRestaurant.trim()) {
       try {
-        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        const userId = userCredential.user.uid;
+        const firestore = getFirestore();
+        const favoritesCollection = collection(firestore, `users/${user.uid}/favoriteRestaurants`);
 
-        // Initialize Firestore with empty list of favorite restaurants
-        const firestore = getFirestore(); // Get the Firestore instance
-        await setDoc(doc(firestore, 'users', userId), { // Use setDoc instead of firestore().collection('users').doc(userId).set
-          username: username,
-          email: email,
-          favoriteRestaurants: [],
-          level:1,
-          points:0,
-          avatarURL:"https://awakenbread.sgp1.cdn.digitaloceanspaces.com/08.JPG",
-          //set default loc to random place in central sg
-          lastKnownLoc: {
-            latitude: 1.3521,
-            longitude: 103.8198 
-          },
-          avatarUrl: '../assets/images/login.jpeg' // Default avatar URL
+        // Add the new restaurant to the subcollection
+        await addDoc(favoritesCollection, {
+          name: newRestaurant.trim(),
+          addedAt: new Date()
         });
-        
 
-        Alert.alert('Sign Up', 'Sign up successful!', [
-          {
-            text: 'OK',
-            onPress: () => navigation.navigate('Home'),
-          },
-        ]);
+        // Update the local state
+        setFavoriteRestaurants(prev => [...prev, { name: newRestaurant.trim() }]);
+        setNewRestaurant('');
+        setModalVisible(false);
+        console.log('Favorite restaurant added:', newRestaurant.trim());
       } catch (error) {
-        let msg = 'An unexpected error occurred';
-        if (error instanceof Error) {
-          console.log('error', error.message);
-          msg = error.message;
-          if (msg.includes('auth/email-already-in-use')) msg = 'Email already in use';
-          if (msg.includes('auth/invalid-email')) msg = 'Please use a valid email';
-        }
-        Alert.alert('Sign Up', msg);
+        console.error('Error adding favorite restaurant:', error);
+        Alert.alert('Error', 'Failed to add favorite restaurant');
       }
     } else {
-      Alert.alert('Sign Up', 'Please fill in all fields');
+      Alert.alert('Error', 'Please enter a restaurant name.');
     }
   };
 
-  return (
-    <View style={[styles.container, { backgroundColor: '#FFFFF' }]}>
-      <SafeAreaView style={styles.safeArea}>
-        <View style={styles.header}>
-          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-            <ArrowLeftIcon size="20" color="black" />
-          </TouchableOpacity>
-        </View>
-        <View style={styles.imageContainer}>
-          <Image source={require('../assets/images/login.jpeg')} style={styles.signupImage} />
-        </View>
-      </SafeAreaView>
-      <View style={styles.formContainer}>
-        <View style={styles.form}>
-          <Text style={styles.label}>Username</Text>
-          <TextInput
-            style={styles.input}
-            value={username}
-            autoCapitalize='none'
-            onChangeText={value => setUsername(value)}
-            placeholder='Enter Name'
-          />
-          <Text style={styles.label}>Email Address</Text>
-          <TextInput
-            style={styles.input}
-            value={email}
-            onChangeText={value => setEmail(value)}
-            autoCapitalize='none'
-            placeholder='Enter Email'
-          />
-          <Text style={styles.label}>Password</Text>
-          <TextInput
-            style={styles.input}
-            autoCapitalize='none'
-            secureTextEntry
-            value={password}
-            onChangeText={value => setPassword(value)}
-            placeholder='Enter Password'
-          />
-          <TouchableOpacity style={styles.submitButton} onPress={submit}>
-            <Text style={styles.submitButtonText}>
-              Sign Up
-            </Text>
-          </TouchableOpacity>
-        </View>
-        <Text style={styles.orText}>Or</Text>
-        <View style={styles.iconContainer}>
-          <TouchableOpacity style={styles.iconButton}>
-            <Image source={require('../assets/images/google.png')} style={styles.icon} />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.iconButton}>
-            <Image source={require('../assets/images/apple.jpeg')} style={styles.icon} />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.iconButton}>
-            <Image source={require('../assets/images/fb.png')} style={styles.icon} />
-          </TouchableOpacity>
-        </View>
-        <View style={styles.loginPromptContainer}>
-          <Text style={styles.loginPromptText}>Already have an account?</Text>
-          <TouchableOpacity onPress={() => navigation.navigate('Login')}>
-            <Text style={styles.loginLinkText}> Login</Text>
-          </TouchableOpacity>
-        </View>
+  const handleLogout = async () => {
+    try {
+      console.log('Logout button pressed');
+      await signOut(auth);
+      Alert.alert('Log Out', 'You have been signed out successfully');
+      navigation.navigate('Home'); 
+    } catch (error) {
+      console.error('Sign Out Error:', error);
+      Alert.alert('Sign Out Error');
+    }
+  };
+
+  const editProfilePress = () => {
+    console.log('Profile Edit button pressed');
+    setEditModalVisible(true);
+  };
+
+  const handleChoosePic = () =>{
+    const options ={
+        mediaType:'photo',
+        maxWidth: 150,
+        maxHeight: 150,
+        quality: 1,
+    };
+    launchImageLibrary(options, (response) => {
+        if (response.didCancel) {
+          console.log('User cancelled image picker');
+        } else if (response.error) {
+          console.error('ImagePicker Error:', response.error);
+          Alert.alert('Error', 'Failed to pick an image');
+        } else {
+          // Set the selected image URI to state
+          setAvatarSource(response.assets[0].uri);
+        }
+      });
+    };
+
+  const handleSaveProfile = async () => {
+    console.log('handleSaveProfile called');
+    
+    if (newName.trim()) {
+      try {
+        const firestore = getFirestore();
+        const userDocRef = doc(firestore, 'users', user.uid);
+  
+        console.log('Firestore initialized');
+        console.log(`Document reference: users/${user.uid}`);
+  
+        // Update Firestore document
+        console.log('Updating Firestore document');
+        await updateDoc(userDocRef, {
+          username: newName.trim(),
+        });
+  
+        console.log('Firestore document updated successfully');
+  
+        // Update Firebase Auth profile
+        console.log('Updating Firebase Auth profile');
+        await updateProfile(auth.currentUser, {
+          displayName: newName.trim(),
+        });
+  
+        console.log('Firebase Auth profile updated successfully');
+
+        // Update the local user context with the new name
+        const updatedUser = {
+          ...user,
+          displayName: newName.trim(),
+        };
+        setUser(updatedUser);
+  
+        setEditModalVisible(false);
+        console.log('Profile name updated:', newName.trim());
+        Alert.alert('Success', 'Profile name updated successfully');
+      } catch (error) {
+        console.error('Error updating profile name:', error);
+        Alert.alert('Error', 'Failed to update profile name');
+      }
+    } else {
+      Alert.alert('Error', 'Please enter a valid name.');
+    }
+  };
+
+  if (!user) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.message}> User not logged in</Text>
       </View>
+    );
+  }
+
+  return (
+    <View style={styles.container}>
+      <View style={styles.profileContainer}>
+        {avatarSource ? (
+          <Image source={{ uri: avatarSource }} style={styles.avatar} />
+        ) : (
+          <Image source={require('@/assets/images/avatar_1.png')} style={styles.avatar} />
+        )}
+        <Text style={styles.name}>{user.displayName}</Text>
+        <Button title="Choose Profile Picture" onPress={handleChoosePic} />
+      </View>
+
+      <FlatList
+        data={favoriteRestaurants}
+        keyExtractor={(item, index) => index.toString()}
+        renderItem={({ item }) => (
+          <View style={styles.restaurantItem}>
+            <Text>{item.name}</Text>
+            {item.latitude && item.longitude && (
+              <Text style={styles.coordinates}>
+                Coordinates: {item.latitude}, {item.longitude}
+              </Text>
+            )}
+          </View>
+        )}
+      />
+
+      <TouchableOpacity style={styles.addButton} onPress={() => setModalVisible(true)}>
+        <Text style={styles.addButtonText}>Add Favorite Restaurant</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity style={styles.editButton} onPress={editProfilePress}>
+        <Text style={styles.editButtonText}>Edit Profile</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+        <Text style={styles.logoutButtonText}>Log Out</Text>
+      </TouchableOpacity>
+
+      <Modal visible={modalVisible} animationType="slide" transparent={true}>
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <TextInput
+              placeholder="Enter Restaurant Name"
+              value={newRestaurant}
+              onChangeText={setNewRestaurant}
+              style={styles.input}
+            />
+            <Button title="Add Restaurant" onPress={handleAddFavoriteRestaurant} />
+            <Button title="Cancel" onPress={() => setModalVisible(false)} />
+          </View>
+        </View>
+      </Modal>
+
+      <Modal visible={editModalVisible} animationType="slide" transparent={true}>
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <TextInput
+              placeholder="Enter New Name"
+              value={newName}
+              onChangeText={setNewName}
+              style={styles.input}
+            />
+            <Button title="Save Changes" onPress={handleSaveProfile} />
+            <Button title="Cancel" onPress={() => setEditModalVisible(false)} />
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'white',
+    padding: 16,
+    backgroundColor: '#fff',
   },
-  safeArea: {
-    flex: 1,
+  profileContainer: {
+    alignItems: 'center',
+    marginBottom: 16,
   },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'flex-start',
-  },
-  backButton: {
-    backgroundColor: '#FFCACC',
-    padding: 8,
-    borderRadius: 12,
-    marginLeft: 16,
-  },
-  imageContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
+  avatar: {
+    width: 100,
     height: 100,
-  },
-  signupImage: {
-    width: 200,
-    height: 200,
-  },
-  formContainer: {
-    flex: 1,
-    backgroundColor: 'white',
-    paddingHorizontal: 32,
-    paddingTop: 32,
-    borderTopLeftRadius: 50,
-    borderTopRightRadius: 50,
-    marginTop: -300,
-  },
-  label: {
-    color: '#4A4A4A',
-    marginLeft: 16,
+    borderRadius: 50,
     marginBottom: 8,
   },
-  form: {
+  name: {
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
+  restaurantItem: {
     padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ccc',
+  },
+  coordinates: {
+    fontSize: 12,
+    color: 'grey',
+  },
+  addButton: {
+    backgroundColor: '#007BFF',
+    padding: 16,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  addButtonText: {
+    color: '#fff',
+    fontSize: 16,
+  },
+  editButton: {
+    backgroundColor: '#28a745',
+    padding: 16,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  editButtonText: {
+    color: '#fff',
+    fontSize: 16,
+  },
+  logoutButton: {
+    backgroundColor: '#dc3545',
+    padding: 16,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  logoutButtonText: {
+    color: '#fff',
+    fontSize: 16,
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContent: {
+    width: '80%',
+    padding: 16,
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    alignItems: 'center',
   },
   input: {
-    padding: 16,
-    backgroundColor: '#E0E0E0',
-    color: '#4A4A4A',
-    borderRadius: 16,
-    marginBottom: 12,
-  },
-  submitButton: {
-    paddingVertical: 12,
-    backgroundColor: '#FFCACC',
-    borderRadius: 16,
-    marginTop: 20,
-  },
-  submitButtonText: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    color: '#4A4A4A',
-  },
-  orText: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    color: '#4A4A4A',
-    paddingVertical: 16,
-  },
-  iconContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    marginBottom: 40,
-  },
-  iconButton: {
+    width: '100%',
     padding: 8,
-    backgroundColor: '#E0E0E0',
-    borderRadius: 16,
-    marginHorizontal: 12,
-    marginTop: 10,
-  },
-  icon: {
-    width: 40,
-    height: 40,
-  },
-  loginPromptContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    marginTop: -10,
-  },
-  loginPromptText: {
-    color: '#9E9E9E',
-    fontWeight: '600',
-  },
-  loginLinkText: {
-    fontWeight: '600',
-    color: '#FFCACC',
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 8,
+    marginBottom: 16,
   },
 });

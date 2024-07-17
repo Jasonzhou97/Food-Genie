@@ -23,14 +23,19 @@ export default function ProfileScreen() {
         const firestore = getFirestore();
         const favoritesCollection = collection(firestore, `users/${user.uid}/favoriteRestaurants`);
         const favoritesSnapshot = await getDocs(favoritesCollection);
-
-        const favoriteRestaurantsList = favoritesSnapshot.docs.map(doc => doc.data());
+  
+        const favoriteRestaurantsList = favoritesSnapshot.docs.map(doc => {
+          const data = doc.data();
+          console.log('Fetched restaurant:', data); // Log fetched data
+          return data;
+        });
         setFavoriteRestaurants(favoriteRestaurantsList);
       }
     };
-
+  
     fetchFavoriteRestaurants();
   }, [user]);
+  
 
   const handleAddFavoriteRestaurant = async () => {
     if (newRestaurant.trim()) {
@@ -39,16 +44,19 @@ export default function ProfileScreen() {
         const favoritesCollection = collection(firestore, `users/${user.uid}/favoriteRestaurants`);
 
         // Add the new restaurant to the subcollection
-        await addDoc(favoritesCollection, {
+        const newRestaurantData = {
           name: newRestaurant.trim(),
+          latitude: null, // add latitude field
+          longitude: null, // add longitude field
           addedAt: new Date()
-        });
+        };
+        await addDoc(favoritesCollection, newRestaurantData);
 
         // Update the local state
-        setFavoriteRestaurants(prev => [...prev, { name: newRestaurant.trim() }]);
+        setFavoriteRestaurants(prev => [...prev, newRestaurantData]);
         setNewRestaurant('');
         setModalVisible(false);
-        console.log('Favorite restaurant added:', newRestaurant.trim());
+        console.log('Favorite restaurant added:', newRestaurantData);
       } catch (error) {
         console.error('Error adding favorite restaurant:', error);
         Alert.alert('Error', 'Failed to add favorite restaurant');
@@ -75,25 +83,25 @@ export default function ProfileScreen() {
     setEditModalVisible(true);
   };
 
-  const handleChoosePic = () =>{
-    const options ={
-        mediaType:'photo',
-        maxWidth: 150,
-        maxHeight: 150,
-        quality: 1,
+  const handleChoosePic = () => {
+    const options = {
+      mediaType: 'photo',
+      maxWidth: 150,
+      maxHeight: 150,
+      quality: 1,
     };
     launchImageLibrary(options, (response) => {
-        if (response.didCancel) {
-          console.log('User cancelled image picker');
-        } else if (response.error) {
-          console.error('ImagePicker Error:', response.error);
-          Alert.alert('Error', 'Failed to pick an image');
-        } else {
-          // Set the selected image URI to state
-          setAvatarSource(response.uri);
-        }
-      });
-    };
+      if (response.didCancel) {
+        console.log('User cancelled image picker');
+      } else if (response.error) {
+        console.error('ImagePicker Error:', response.error);
+        Alert.alert('Error', 'Failed to pick an image');
+      } else {
+        // Set the selected image URI to state
+        setAvatarSource(response.assets[0].uri);
+      }
+    });
+  };
 
   const handleSaveProfile = async () => {
     console.log('handleSaveProfile called');
@@ -144,206 +152,164 @@ export default function ProfileScreen() {
   if (!user) {
     return (
       <View style={styles.container}>
-        <Text style={styles.message}> User not logged in</Text>
+        <Text style={styles.message}>User not logged in</Text>
       </View>
     );
   }
 
-
   return (
     <View style={styles.container}>
-      <Image
-        source={require('../../assets/images/Logo.png')}
-        style={styles.profileImage}
-      />
-      <Text style={styles.name}>{user.displayName || 'No Name Provided'}</Text>
-      <Text style={styles.email}>{user.email}</Text>
+      <View style={styles.profileContainer}>
+        {avatarSource ? (
+          <Image source={{ uri: avatarSource }} style={styles.avatar} />
+        ) : (
+          <Image source={require('@/assets/images/avatar_1.png')} style={styles.avatar} />
+        )}
+        <Text style={styles.name}>{user.displayName}</Text>
+        <Button title="Choose Profile Picture" onPress={handleChoosePic} />
+      </View>
 
-      <TouchableOpacity onPress={editProfilePress} style={styles.button}>
-        <Text style={styles.buttonText}>Edit Profile</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity onPress={handleChoosePic} style={styles.button}>
-        <Text style={styles.buttonText}>Profile Picture</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity style={styles.button} onPress={handleLogout}>
-        <Text style={styles.buttonText}>Log Out</Text>
-      </TouchableOpacity>
-
-      <Text style={styles.sectionTitle}>Favorite Restaurants</Text>
       <FlatList
         data={favoriteRestaurants}
-        keyExtractor={(item) => item}
+        keyExtractor={(item, index) => index.toString()}
         renderItem={({ item }) => (
           <View style={styles.restaurantItem}>
-            <Text style={styles.restaurantText}>{item}</Text>
+            <Text>{item.name || 'Unnamed Restaurant'}</Text>
+            {item.latitude && item.longitude && (
+              <Text style={styles.coordinates}>
+                Coordinates: {item.latitude}, {item.longitude}
+              </Text>
+            )}
           </View>
         )}
-        ListEmptyComponent={<Text style={styles.noFavoritesText}>No favorite restaurants</Text>}
       />
 
       <TouchableOpacity style={styles.addButton} onPress={() => setModalVisible(true)}>
-        <Text style={styles.buttonText}>Add Favorite Restaurant</Text>
+        <Text style={styles.addButtonText}>Add Favorite Restaurant</Text>
       </TouchableOpacity>
 
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={editModalVisible}
-        onRequestClose={() => {
-          setEditModalVisible(!editModalVisible);
-      }}
-      >
-      <View style={styles.modalView}>
-      <Text style={styles.modalText}>Edit Profile Name</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="New Name"
-        value={newName}
-        onChangeText={setNewName}
-      />
-      <TouchableOpacity style={styles.button} onPress={handleSaveProfile}>
-        <Text style={styles.buttonText}>Save</Text>
+      <TouchableOpacity style={styles.editButton} onPress={editProfilePress}>
+        <Text style={styles.editButtonText}>Edit Profile</Text>
       </TouchableOpacity>
-      <TouchableOpacity style={[styles.button, styles.buttonClose]} onPress={() => setEditModalVisible(!editModalVisible)}>
-        <Text style={styles.buttonText}>Cancel</Text>
+
+      <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+        <Text style={styles.logoutButtonText}>Log Out</Text>
       </TouchableOpacity>
-      </View>
+
+      <Modal visible={modalVisible} animationType="slide" transparent={true}>
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <TextInput
+              placeholder="Enter Restaurant Name"
+              value={newRestaurant}
+              onChangeText={setNewRestaurant}
+              style={styles.input}
+            />
+            <Button title="Add Restaurant" onPress={handleAddFavoriteRestaurant} />
+            <Button title="Cancel" onPress={() => setModalVisible(false)} />
+          </View>
+        </View>
       </Modal>
 
-
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={() => {
-          setModalVisible(!modalVisible);
-        }}
-      >
-        <View style={styles.modalView}>
-          <Text style={styles.modalText}>Add a new favorite restaurant</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Restaurant Name"
-            value={newRestaurant}
-            onChangeText={setNewRestaurant}
-          />
-          <TouchableOpacity style={styles.button} onPress={handleAddFavoriteRestaurant}>
-            <Text style={styles.buttonText}>Add</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={[styles.button, styles.buttonClose]} onPress={() => setModalVisible(!modalVisible)}>
-            <Text style={styles.buttonText}>Cancel</Text>
-          </TouchableOpacity>
+      <Modal visible={editModalVisible} animationType="slide" transparent={true}>
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <TextInput
+              placeholder="Enter New Name"
+              value={newName}
+              onChangeText={setNewName}
+              style={styles.input}
+            />
+            <Button title="Save Changes" onPress={handleSaveProfile} />
+            <Button title="Cancel" onPress={() => setEditModalVisible(false)} />
+          </View>
         </View>
       </Modal>
     </View>
   );
 }
+
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 20,
+    padding: 16,
     backgroundColor: '#fff',
   },
-  profileImage: {
-    width: 150,
-    height: 150,
-    borderRadius: 75,
-    marginBottom: 20,
+  profileContainer: {
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  avatar: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    marginBottom: 8,
   },
   name: {
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: 'bold',
-    marginBottom: 10,
   },
-  email: {
-    fontSize: 18,
-    color: '#777',
-    marginBottom: 20,
+  restaurantItem: {
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ccc',
   },
-  button: {
-    backgroundColor: '#1E90FF',
-    padding: 10,
-    borderRadius: 5,
-    marginVertical: 5,
-    width: '80%',
-    alignItems: 'center',
+  coordinates: {
+    fontSize: 12,
+    color: 'grey',
   },
   addButton: {
-    backgroundColor: '#32CD32',
-    padding: 10,
-    borderRadius: 5,
-    marginVertical: 5,
-    width: '80%',
+    backgroundColor: '#007BFF',
+    padding: 16,
+    borderRadius: 8,
     alignItems: 'center',
-    marginTop: 20,
+    marginBottom: 16,
   },
-  buttonText: {
+  addButtonText: {
     color: '#fff',
     fontSize: 16,
   },
-  message: {
-    fontSize: 18,
-    color: '#777',
+  editButton: {
+    backgroundColor: '#28a745',
+    padding: 16,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginBottom: 16,
   },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginTop: 20,
-    marginBottom: 10,
+  editButtonText: {
+    color: '#fff',
+    fontSize: 16,
   },
-  restaurantItem: {
-    padding: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
-    width: '100%',
+  logoutButton: {
+    backgroundColor: '#dc3545',
+    padding: 16,
+    borderRadius: 8,
     alignItems: 'center',
   },
-  restaurantText: {
+  logoutButtonText: {
+    color: '#fff',
     fontSize: 16,
-    color: '#333',
   },
-  noFavoritesText: {
-    fontSize: 16,
-    color: '#777',
-    marginTop: 10,
-  },
-  modalView: {
-    marginTop: 300,
-    margin: 20,
-    backgroundColor: 'white',
-    borderRadius: 20,
-    padding: 35,
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
-  modalText: {
-    marginBottom: 15,
-    textAlign: 'center',
-    fontSize: 18,
-    fontWeight: 'bold',
+  modalContent: {
+    width: '80%',
+    padding: 16,
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    alignItems: 'center',
   },
   input: {
-    height: 40,
-    borderColor: '#ccc',
-    borderWidth: 1,
-    borderRadius: 5,
     width: '100%',
-    paddingHorizontal: 10,
-    marginBottom: 15,
-  },
-  buttonClose: {
-    backgroundColor: '#FF6347',
+    padding: 8,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 8,
+    marginBottom: 16,
   },
 });
- 

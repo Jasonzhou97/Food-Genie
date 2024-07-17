@@ -63,22 +63,24 @@ const Map = () => {
       const firestore = getFirestore();
       const usersCollection = collection(firestore, 'users');
       const userDocs = await getDocs(usersCollection);
-
+  
       const locations = userDocs.docs.map(doc => {
         const data = doc.data();
         return {
           id: doc.id,
-          ...data.lastKnownLoc, // Adjust according to your Firestore schema
-          avatarUrl: data.avatarUrl, // Assuming avatarUrl exists in your data
+          name: data.name, // Assuming `name` field exists in Firestore
+          latitude: data.latitude,
+          longitude: data.longitude,
+          avatarUrl: data.avatarUrl,
         };
       });
-
-      console.log("Fetched user locations: ", locations); // Debugging: Log the fetched locations
+  
       setUserLocations(locations);
     };
-
+  
     fetchUserLocations();
   }, []);
+  
 
   // Handle search query change
   useEffect(() => {
@@ -107,28 +109,42 @@ const Map = () => {
   const handleMapPress = (event) => {
     const { latitude, longitude } = event.nativeEvent.coordinate;
     setSelectedLocation({ latitude, longitude });
-    Alert.alert(
+  
+    // Prompt user to enter restaurant name
+    Alert.prompt(
       "Add Favorite Restaurant",
-      "Do you want to add this location to your favorite restaurants?",
+      "Enter the name of the restaurant:",
       [
         {
           text: "Cancel",
-          style: "cancel"
+          style: "cancel",
         },
-        { text: "OK", onPress: () => saveFavoriteRestaurant(latitude, longitude) }
-      ]
+        {
+          text: "OK",
+          onPress: (restaurantName) => {
+            if (restaurantName.trim()) {
+              saveFavoriteRestaurant(latitude, longitude, restaurantName.trim());
+            } else {
+              Alert.alert("Error", "Please enter a valid restaurant name.");
+            }
+          },
+        },
+      ],
+      "plain-text", // Specify input type for the prompt
+      ""
     );
   };
-
+  
   // Save favorite restaurant to Firestore
-  const saveFavoriteRestaurant = async (latitude, longitude) => {
+  const saveFavoriteRestaurant = async (latitude, longitude, restaurantName) => {
     const firestore = getFirestore();
     const user = auth.currentUser;
-
+  
     if (user) {
       try {
         const favoritesCollection = collection(firestore, `users/${user.uid}/favoriteRestaurants`);
         await addDoc(favoritesCollection, {
+          name: restaurantName, // Use the actual restaurant name
           latitude,
           longitude,
           addedAt: new Date()
@@ -139,7 +155,8 @@ const Map = () => {
       }
     }
   };
-
+  
+  
   return (
     <View style={{ flex: 1 }}>
       {/* Google Places Autocomplete */}
