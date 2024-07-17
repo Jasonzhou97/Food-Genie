@@ -4,8 +4,9 @@ import { AuthContext } from '../../hooks/AuthContext';
 import { auth } from '../../config/firebase'; 
 import { signOut, updateProfile } from 'firebase/auth';
 import { useNavigation } from '@react-navigation/native';
-import { getFirestore, collection, getDocs, addDoc, doc, updateDoc } from 'firebase/firestore';
+import { getFirestore, collection, getDocs, addDoc, doc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { launchImageLibrary } from 'react-native-image-picker';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
 export default function ProfileScreen() {
   const { user, setUser } = useContext(AuthContext);
@@ -17,18 +18,18 @@ export default function ProfileScreen() {
   const [modalVisible, setModalVisible] = useState(false);
   const [avatarSource, setAvatarSource] = useState(null);
 
-  useEffect(() => {
+// Update useEffect to fetch favorite restaurants
+useEffect(() => {
     const fetchFavoriteRestaurants = async () => {
       if (user) {
         const firestore = getFirestore();
         const favoritesCollection = collection(firestore, `users/${user.uid}/favoriteRestaurants`);
         const favoritesSnapshot = await getDocs(favoritesCollection);
   
-        const favoriteRestaurantsList = favoritesSnapshot.docs.map(doc => {
-          const data = doc.data();
-          console.log('Fetched restaurant:', data); // Log fetched data
-          return data;
-        });
+        const favoriteRestaurantsList = favoritesSnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
         setFavoriteRestaurants(favoriteRestaurantsList);
       }
     };
@@ -36,33 +37,50 @@ export default function ProfileScreen() {
     fetchFavoriteRestaurants();
   }, [user]);
   
-
+  const handleAdd = () =>{
+    navigation.navigate('map');
+  }
   const handleAddFavoriteRestaurant = async () => {
+    navigation.navigate('map');
     if (newRestaurant.trim()) {
       try {
         const firestore = getFirestore();
-        const favoritesCollection = collection(firestore, `users/${user.uid}/favoriteRestaurants`);
+    const favoritesCollection = collection(firestore, `users/${user.uid}/favoriteRestaurants`);
 
-        // Add the new restaurant to the subcollection
-        const newRestaurantData = {
-          name: newRestaurant.trim(),
-          latitude: null, // add latitude field
-          longitude: null, // add longitude field
-          addedAt: new Date()
-        };
-        await addDoc(favoritesCollection, newRestaurantData);
+    const newRestaurantData = {
+      name: newRestaurant.trim(),
+      latitude: null,
+      longitude: null,
+      addedAt: new Date()
+    };
+    const docRef = await addDoc(favoritesCollection, newRestaurantData);
 
-        // Update the local state
-        setFavoriteRestaurants(prev => [...prev, newRestaurantData]);
-        setNewRestaurant('');
-        setModalVisible(false);
-        console.log('Favorite restaurant added:', newRestaurantData);
-      } catch (error) {
-        console.error('Error adding favorite restaurant:', error);
-        Alert.alert('Error', 'Failed to add favorite restaurant');
-      }
-    } else {
-      Alert.alert('Error', 'Please enter a restaurant name.');
+    // Update local state to reflect the change
+    setFavoriteRestaurants(prev => [...prev, { id: docRef.id, ...newRestaurantData }]);
+    setNewRestaurant('');
+    setModalVisible(false);
+    console.log('Favorite restaurant added:', newRestaurantData);
+  } catch (error) {
+    console.error('Error adding favorite restaurant:', error);
+    Alert.alert('Error', 'Failed to add favorite restaurant');
+  }
+  };
+  
+}
+
+  const handleRemoveFavoriteRestaurant = async (id) => {
+    // Remove restaurant from Firestore
+    try {
+      const firestore = getFirestore();
+      const favoritesCollection = collection(firestore, `users/${user.uid}/favoriteRestaurants`);
+      await deleteDoc(doc(favoritesCollection, id));
+  
+      // Update local state to reflect the change
+      setFavoriteRestaurants(prev => prev.filter(restaurant => restaurant.id !== id));
+      console.log('Favorite restaurant removed:', id);
+    } catch (error) {
+      console.error('Error removing favorite restaurant:', error);
+      Alert.alert('Error', 'Failed to remove favorite restaurant');
     }
   };
 
@@ -82,6 +100,7 @@ export default function ProfileScreen() {
     console.log('Profile Edit button pressed');
     setEditModalVisible(true);
   };
+
 
   const handleChoosePic = () => {
     const options = {
@@ -171,20 +190,18 @@ export default function ProfileScreen() {
 
       <FlatList
         data={favoriteRestaurants}
-        keyExtractor={(item, index) => index.toString()}
+        keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <View style={styles.restaurantItem}>
             <Text>{item.name || 'Unnamed Restaurant'}</Text>
-            {item.latitude && item.longitude && (
-              <Text style={styles.coordinates}>
-                Coordinates: {item.latitude}, {item.longitude}
-              </Text>
-            )}
+            <TouchableOpacity onPress={() => handleRemoveFavoriteRestaurant(item.id)}>
+              <Ionicons name="remove-circle" size={24} color="red" />
+            </TouchableOpacity>
           </View>
         )}
       />
 
-      <TouchableOpacity style={styles.addButton} onPress={() => setModalVisible(true)}>
+      <TouchableOpacity style={styles.addButton} onPress={handleAdd}>
         <Text style={styles.addButtonText}>Add Favorite Restaurant</Text>
       </TouchableOpacity>
 
@@ -195,7 +212,7 @@ export default function ProfileScreen() {
       <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
         <Text style={styles.logoutButtonText}>Log Out</Text>
       </TouchableOpacity>
-
+        
       <Modal visible={modalVisible} animationType="slide" transparent={true}>
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
@@ -210,7 +227,7 @@ export default function ProfileScreen() {
           </View>
         </View>
       </Modal>
-
+ 
       <Modal visible={editModalVisible} animationType="slide" transparent={true}>
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
@@ -251,7 +268,11 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   restaurantItem: {
-    padding: 16,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
     borderBottomWidth: 1,
     borderBottomColor: '#ccc',
   },

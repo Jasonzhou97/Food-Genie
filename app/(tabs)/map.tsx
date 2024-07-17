@@ -11,6 +11,7 @@ const Map = () => {
   const route = useRoute();
   const [currentPosition, setCurrentPosition] = useState(null);
   const [userLocations, setUserLocations] = useState([]);
+  const [favoriteRestaurants, setFavoriteRestaurants] = useState([]);
   const [selectedLocation, setSelectedLocation] = useState(null);
   const mapRef = useRef(null);
   const googlePlacesRef = useRef(null);
@@ -56,7 +57,25 @@ const Map = () => {
       updateUserLoc(latitude, longitude);
     })();
   }, []);
+  useEffect(() => {
+    const fetchFavoriteRestaurants = async () => {
+      const firestore = getFirestore();
+      const user = auth.currentUser;
 
+      if (user) {
+        const favoritesCollection = collection(firestore, `users/${user.uid}/favoriteRestaurants`);
+        const favoritesSnapshot = await getDocs(favoritesCollection);
+
+        const favoriteRestaurantsList = favoritesSnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+        setFavoriteRestaurants(favoriteRestaurantsList);
+      }
+    };
+
+    fetchFavoriteRestaurants();
+  }, []);
   // Fetch other users' locations from Firestore
   useEffect(() => {
     const fetchUserLocations = async () => {
@@ -215,6 +234,20 @@ const Map = () => {
             </View>
           </Marker>
         ))}
+        {favoriteRestaurants.map((restaurant, index) => (
+          <Marker
+            key={index}
+            coordinate={{
+              latitude: restaurant.latitude || 0,
+              longitude: restaurant.longitude || 0,
+            }}
+          >
+            <View style={styles.marker}>
+              <Text style={styles.markerText}>❤️</Text>
+            </View>
+          </Marker>
+        ))}
+
       </MapView>
     </View>
   );
@@ -258,6 +291,13 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
+  },
+  marker: {
+    flexDirection: 'column',
+    alignItems: 'center',
+  },
+  markerText: {
+    fontSize: 24,
   },
 });
 
