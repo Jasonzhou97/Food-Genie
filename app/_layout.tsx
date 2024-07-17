@@ -32,7 +32,7 @@ export default function RootLayout() {
     <AuthProvider>
       <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
         <Stack>
-          <Stack.Screen name="(tabs)" options={{ headerShown: true, title: 'FoodGenie' }} />
+          <Stack.Screen name="Home" options={{ headerShown: true, title: 'FoodGenie' }} />
           <Stack.Screen name="Login" options={{ headerShown: false }} />
           <Stack.Screen name="Register" options={{ headerShown: false }} />
           <Stack.Screen name="profile" options={{ headerShown: false }} />

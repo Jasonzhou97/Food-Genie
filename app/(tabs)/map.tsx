@@ -39,23 +39,27 @@ const Map = () => {
 
   // Fetch current user's location on component mount
   useEffect(() => {
-    (async () => {
-      let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') {
-        alert('We are unable to get your location permission');
-        return;
-      }
-
-      let location = await Location.getCurrentPositionAsync({});
-      const { latitude, longitude } = location.coords;
-      setCurrentPosition({
-        latitude,
-        longitude,
-        latitudeDelta: 0.0922,
-        longitudeDelta: 0.0421,
+    const fetchUserLocations = async () => {
+      const firestore = getFirestore();
+      const usersCollection = collection(firestore, 'users');
+      const userDocs = await getDocs(usersCollection);
+  
+      const locations = userDocs.docs.map(doc => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          name: data.name, // Assuming `name` field exists in Firestore
+          latitude: data.latitude,
+          longitude: data.longitude,
+          avatarUrl: data.avatarUrl,
+        };
       });
-      updateUserLoc(latitude, longitude);
-    })();
+  
+      console.log("User Locations:", locations); // Check console for fetched locations
+      setUserLocations(locations);
+    };
+  
+    fetchUserLocations();
   }, []);
   useEffect(() => {
     const fetchFavoriteRestaurants = async () => {

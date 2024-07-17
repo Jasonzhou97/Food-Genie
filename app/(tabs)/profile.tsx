@@ -59,7 +59,6 @@ useEffect(() => {
     setFavoriteRestaurants(prev => [...prev, { id: docRef.id, ...newRestaurantData }]);
     setNewRestaurant('');
     setModalVisible(false);
-    console.log('Favorite restaurant added:', newRestaurantData);
   } catch (error) {
     console.error('Error adding favorite restaurant:', error);
     Alert.alert('Error', 'Failed to add favorite restaurant');
@@ -75,9 +74,8 @@ useEffect(() => {
       const favoritesCollection = collection(firestore, `users/${user.uid}/favoriteRestaurants`);
       await deleteDoc(doc(favoritesCollection, id));
   
-      // Update local state to reflect the change
+      // Update local state to show change
       setFavoriteRestaurants(prev => prev.filter(restaurant => restaurant.id !== id));
-      console.log('Favorite restaurant removed:', id);
     } catch (error) {
       console.error('Error removing favorite restaurant:', error);
       Alert.alert('Error', 'Failed to remove favorite restaurant');
@@ -89,7 +87,7 @@ useEffect(() => {
       console.log('Logout button pressed');
       await signOut(auth);
       Alert.alert('Log Out', 'You have been signed out successfully');
-      navigation.navigate('Home'); 
+      navigation.navigate('index'); 
     } catch (error) {
       console.error('Sign Out Error:', error);
       Alert.alert('Sign Out Error');
