@@ -9,8 +9,8 @@ export default function FeatRow({ title, description, restaurants }) {
         <View>
             <View style={tw`flex-row items-center px-4 justify-between`}>
                 <View>
-                    <Text style={tw`text-gray-500 text-xs`}>{title}</Text>
-                    <Text>{description}</Text>
+                    <Text style={tw`text-black-500 text-lg font-bold`}>{title}</Text>
+                    <Text style = {tw`text-xs`}>{description}</Text>
                 </View>
                 <TouchableOpacity>
                     <Text>See All</Text>

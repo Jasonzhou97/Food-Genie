@@ -51,12 +51,12 @@ export const featured = {
       {
         id: 1,
         name: 'The Roti Prata House',
-        image: require('../assets/images/steak.png'),
+        image: require('../assets/images/Rotiprata.png'),
         description: 'Crispy and savory prata',
         lng: 103.839843,
         lat: 1.352083,
         address: '246M Upper Thomson Rd, Singapore 574370',
-        stars: 4.5,
+        stars: 4.2,
         reviews: '2.1k',
         cuisineID: 7,
         category: 'Singaporean',
@@ -87,7 +87,7 @@ export const featured = {
       {
         id: 2,
         name: 'Jumbo Seafood',
-        image: require('../assets/images/steak.png'),
+        image: require('../assets/images/JumboSeafood.png'),
         description: 'Famous chili crab',
         lng: 103.893456,
         lat: 1.282302,
@@ -123,7 +123,7 @@ export const featured = {
       {
         id: 3,
         name: 'Fatboy’s The Burger Bar',
-        image: require('../assets/images/steak.png'),
+        image: require('../assets/images/FatBoys.png'),
         description: 'Gourmet burgers',
         lng: 103.819836,
         lat: 1.290270,
@@ -159,7 +159,7 @@ export const featured = {
       {
         id: 4,
         name: 'Song Fa Bak Kut Teh',
-        image: require('../assets/images/steak.png'),
+        image: require('../assets/images/BakKutTeh.png'),
         description: 'Traditional peppery pork rib soup',
         lng: 103.845304,
         lat: 1.286957,
@@ -195,7 +195,7 @@ export const featured = {
       {
         id: 5,
         name: 'Komala Vilas',
-        image: require('../assets/images/steak.png'),
+        image: require('../assets/images/KomalaVilas.png'),
         description: 'Authentic South Indian vegetarian cuisine',
         lng: 103.852319,
         lat: 1.300076,
@@ -231,7 +231,7 @@ export const featured = {
       {
         id: 6,
         name: 'Burnt Ends',
-        image: require('../assets/images/steak.png'),
+        image: require('../assets/images/BurntEnds.png'),
         description: 'Modern Australian BBQ',
         lng: 103.841758,
         lat: 1.280245,
@@ -267,7 +267,7 @@ export const featured = {
       {
         id: 7,
         name: 'Teppei Japanese Restaurant',
-        image: require('../assets/images/steak.png'),
+        image: require('../assets/images/TeppeiJapanese.png'),
         description: 'Omakase dining experience',
         lng: 103.844267,
         lat: 1.280632,
