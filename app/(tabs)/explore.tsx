@@ -40,7 +40,7 @@ export default function ExploreScreen() {
           </ScrollView>
         </View>
         <View style={tw`mt-5 px-4`}>
-          {[featured, featured, featured].map((item, index) => (
+          {[featured, featured].map((item, index) => (
             <FeatRow
               key={index}
               title={item.title}
