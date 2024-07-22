@@ -7,7 +7,7 @@ import { cuisines, featured } from '../../constants/cuisines';
 
 export default function ExploreScreen() {
   const [activeCuisine, setActiveCuisine] = useState(null);
-  const filteredRest = featured.restaurants.filter(restaurant => activeCuisine?restaurant.cuisineID==activeCuisine:true);
+  const filteredRest = featured.restaurants.filter(restaurant => activeCuisine ? restaurant.cuisineID == activeCuisine : true);
 
   const handleCuisinePress = (cuisineId) => {
     setActiveCuisine(prevCuisine => prevCuisine === cuisineId ? null : cuisineId);

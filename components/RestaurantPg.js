@@ -12,7 +12,7 @@ export default function RestaurantPg({ item }) {
                 <Image style={tw`h-36 w-full rounded-t-3xl`} source={item.image} />
                 <View style={tw`p-4`}>
                 <Text style={tw`text-lg font-semibold mb-1`}>{item.name}</Text>
-                <View style={tw`flex-row items-centre mb-2`}>
+                <View style={tw`flex-row items-center mb-2`}>
                     <Image source={require('../assets/images/star.png')} style={tw`h-4 w-4 mr-1`} />
                     <Text style={tw`text-xs`}>
                         <Text style={tw`text-green-700`}>{item.stars}</Text>
