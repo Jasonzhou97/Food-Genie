@@ -1,8 +1,7 @@
-import { View, Text, ScrollView, Image } from 'react-native';
+import { View, Text, ScrollView, Image, TouchableOpacity } from 'react-native';
 import React from 'react';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import tw from 'twrnc';
-import { TouchableOpacity } from 'react-native-gesture-handler';
 import * as Icon from 'react-native-feather';
 
 export default function Restaurant() {
@@ -16,7 +15,7 @@ export default function Restaurant() {
             <ScrollView>
                 <View tyle={tw`relative`}>
                 <TouchableOpacity onPress={()=>navigation.goBack()}
-                        style={[tw`absolute top-10 left-2 bg-gray-200 p-1 rounded-full`, { zIndex: 10 }]}>
+                        style={[tw`absolute top-10 left-2 bg-gray-200 p-1 rounded-full`, { zIndex: 100 }]}>
                         <Icon.ArrowLeft strokeWidth={3} stroke="black" width={32} height={32} />
                     </TouchableOpacity>
                     <Image source={item.image} style={tw`absolute top-23 w-full h-72 rounded-3xl `} />
