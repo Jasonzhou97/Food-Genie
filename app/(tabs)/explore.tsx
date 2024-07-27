@@ -3,12 +3,12 @@ import React, { useState } from 'react';
 import { TouchableOpacity, GestureHandlerRootView } from 'react-native-gesture-handler';
 import tw from 'twrnc';
 import FeatRow from '@/components/FeatRow';
-import { cuisines, featured } from '../../constants/cuisines';
+import { cuisines, featured ,topRated} from '../../constants/cuisines';
 
 export default function ExploreScreen() {
   const [activeCuisine, setActiveCuisine] = useState(null);
-  const filteredRest = featured.restaurants.filter(restaurant => activeCuisine ? restaurant.cuisineID == activeCuisine : true);
-
+  const filteredRest = featured.restaurants.filter(restaurant => activeCuisine?restaurant.cuisineID==activeCuisine:true);
+  const filteredTopRated = topRated.restaurants.filter(restaurant=>activeCuisine?restaurant.cuisineID==activeCuisine:true)
   const handleCuisinePress = (cuisineId) => {
     setActiveCuisine(prevCuisine => prevCuisine === cuisineId ? null : cuisineId);
   };
@@ -40,14 +40,16 @@ export default function ExploreScreen() {
           </ScrollView>
         </View>
         <View style={tw`mt-5 px-4`}>
-          {[featured, featured].map((item, index) => (
-            <FeatRow
-              key={index}
-              title={item.title}
-              restaurants={filteredRest}
-              description={item.description}
-            />
-          ))}
+        <FeatRow
+            title={featured.title}
+            restaurants={filteredRest}
+            description={featured.description}
+          />
+          <FeatRow
+            title={topRated.title}
+            restaurants={filteredTopRated}
+            description={topRated.description}
+          />
         </View>
       </ScrollView>
     </GestureHandlerRootView>

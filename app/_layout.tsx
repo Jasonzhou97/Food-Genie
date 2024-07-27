@@ -37,6 +37,7 @@ export default function RootLayout() {
           <Stack.Screen name="Register" options={{ headerShown: false }} />
           {/* <Stack.Screen name="profile" options={{ headerShown: false }} /> */}
           <Stack.Screen name="Restaurant" options={{ headerShown: false }} />
+          <Stack.Screen name="Chatroom" options={{ headerShown: false }} />
           <Stack.Screen name="+not-found" />
           <Stack.Screen name="(tabs)" options={{ headerShown: true, title: 'FoodGenie' }} />
         </Stack>

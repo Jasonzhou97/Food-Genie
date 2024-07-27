@@ -12,9 +12,6 @@ export default function FeatRow({ title, description, restaurants }) {
                     <Text style={tw`text-lg font-bold`}>{title}</Text>
                     <Text style = {tw`text-xs`}>{description}</Text>
                 </View>
-                <TouchableOpacity>
-                    <Text>See All</Text>
-                </TouchableOpacity>
             </View>
             <ScrollView
                 horizontal

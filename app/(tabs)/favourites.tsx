@@ -12,61 +12,71 @@ export default function favouritesScreen() {
 
   const [output, setOutput] = useState('');
 
-  useEffect(() => {
-    const fetchFavoriteRestaurants = async () => {
-      if (user) {
-        try {
-          const firestore = getFirestore();
-          const favoritesCollection = collection(firestore, `users/${user.uid}/favoriteRestaurants`);
-          const favoritesSnapshot = await getDocs(favoritesCollection);
-  
-          const favoriteRestaurantsList = favoritesSnapshot.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data()
-          }));
-          setFavRestaurants(favoriteRestaurantsList);
-        } catch (error) {
-          console.error('Error fetching favorite restaurants:', error);
-          Alert.alert('Error', 'Failed to fetch favorite restaurants');
-        }
+  const fetchFavoriteRestaurants = async () => {
+    if (user) {
+      try {
+        const firestore = getFirestore();
+        const favoritesCollection = collection(firestore, `users/${user.uid}/favoriteRestaurants`);
+        const favoritesSnapshot = await getDocs(favoritesCollection);
+
+        const favoriteRestaurantsList = favoritesSnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+        
+        // Log the fetched favorite restaurants
+        console.log('Fetched Favorite Restaurants:', favoriteRestaurantsList);
+        setFavRestaurants(favoriteRestaurantsList);
+      } catch (error) {
+        console.error('Error fetching favorite restaurants:', error);
+        Alert.alert('Error', 'Failed to fetch favorite restaurants');
       }
-    };
-  
+    }
+  };
+
+  useEffect(() => {
     fetchFavoriteRestaurants();
   }, [user]);
 
-// handle recommendations based on favRestaurants
-const recButton = async () => {
-  try {
-    const userInput = `Based on these favorite restaurants: ${favRestaurants.join(", ")}, recommend me restaurants or cuisine styles.`;
-    const response = await axios.post(
-      'https://api.openai.com/v1/chat/completions',
-      {
-        model: "gpt-3.5-turbo",
-        messages: [{ role: "user", content: userInput }],
-        temperature: 0.7,
-      },
-      {
-        headers: {
-          'Authorization': `Bearer sk-proj-taAkgo9f4Dbd088NclcWT3BlbkFJrm2wuyGiwKwMIvCiG6q6`,
-          'Content-Type': 'application/json',
+  const recButton = async () => {
+    try {
+      // Extract and join the names of the favorite restaurants
+      const restaurantNames = favRestaurants.map(restaurant => restaurant.name).join(", ");
+      
+      // Create the user input string for the recommendation API
+      const userInput = `Based on these favorite restaurants: ${restaurantNames}, recommend me restaurants or cuisine styles.`;
+      console.log('User Input for Recommendations:', userInput);
+      
+      // Make the request to the OpenAI API
+      const response = await axios.post(
+        'https://api.openai.com/v1/chat/completions',
+        {
+          model: "gpt-3.5-turbo",
+          messages: [{ role: "user", content: userInput }],
+          temperature: 0.7,
         },
+        {
+          headers: {
+            'Authorization': `Bearer sk-proj-taAkgo9f4Dbd088NclcWT3BlbkFJrm2wuyGiwKwMIvCiG6q6`, // Replace with your actual API key
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+  
+      // Handle the API response
+      if (response.data && response.data.choices && response.data.choices.length > 0) {
+        const rec = response.data.choices[0].message.content?.trim() || 'No recommendations found';
+        setOutput(rec);
+        Alert.alert('Recommendations', rec);
+      } else {
+        console.error('Empty or invalid response from OpenAI API:', response);
+        Alert.alert('Error', 'Failed to fetch recommendations: Empty or invalid response');
       }
-    );
-
-    if (response.data && response.data.choices && response.data.choices.length > 0) {
-      const rec = response.data.choices[0].message.content?.trim() || 'No recommendations found';
-      setOutput(rec);
-      Alert.alert('Recommendations', rec);
-    } else {
-      console.error('Empty or invalid response from OpenAI API:', response);
-      Alert.alert('Error', 'Failed to fetch recommendations: Empty or invalid response');
+    } catch (error) {
+      console.error('Error fetching recommendations:', error);
+      Alert.alert('Error', 'Failed to fetch recommendations');
     }
-  } catch (error) {
-    console.error('Error fetching recommendations:', error);
-    Alert.alert('Error', 'Failed to fetch recommendations');
-  }
-};
+  };
 
   return (
     <View style={styles.container}>

@@ -300,6 +300,222 @@ export const featured = {
           },
         ],
       },
+      {
+        id: 8,
+        name: 'Tasty Thai',
+        image: require('../assets/images/TastyThai.jpeg'),
+        description: 'Authentic Thai street food',
+        lng: 103.855934,
+        lat: 1.290650,
+        address: '45 Orchard Rd, Singapore 238833',
+        stars: 4.3,
+        reviews: '1.4k',
+        cuisineID: 4, // Thai
+        category: 'Thai',
+        dishes: [
+          {
+            id: 1,
+            name: 'Pad Thai',
+            description: 'Stir-fried rice noodles with shrimp',
+            price: 12,
+            image: require('../assets/images/pizzaDish.png'),
+          },
+          {
+            id: 2,
+            name: 'Tom Yum Goong',
+            description: 'Spicy shrimp soup',
+            price: 15,
+            image: require('../assets/images/pizzaDish.png'),
+          },
+          {
+            id: 3,
+            name: 'Green Curry',
+            description: 'Spicy green curry with chicken',
+            price: 14,
+            image: require('../assets/images/pizzaDish.png'),
+          },
+        ],
+      },
+      {
+        id: 9,
+        name: 'Sakura Sushi',
+        image: require('../assets/images/SakuraSushi.jpeg'),
+        description: 'Fresh sushi and sashimi',
+        lng: 103.841643,
+        lat: 1.291083,
+        address: '12 Marina Blvd, Singapore 018982',
+        stars: 4.6,
+        reviews: '2.0k',
+        cuisineID: 3, // Japanese
+        category: 'Japanese',
+        dishes: [
+          {
+            id: 1,
+            name: 'Salmon Sushi',
+            description: 'Fresh salmon on vinegared rice',
+            price: 20,
+            image: require('../assets/images/pizzaDish.png'),
+          },
+          {
+            id: 2,
+            name: 'Spicy Tuna Roll',
+            description: 'Spicy tuna with avocado roll',
+            price: 18,
+            image: require('../assets/images/pizzaDish.png'),
+          },
+          {
+            id: 3,
+            name: 'Tempura Udon',
+            description: 'Udon noodles with tempura',
+            price: 22,
+            image: require('../assets/images/pizzaDish.png'),
+          },
+        ],
+      },
+      {
+        id: 10,
+        name: 'Mamma Mia',
+        image: require('../assets/images/MammaMia.jpeg'),
+        description: 'Authentic Italian pasta and pizza',
+        lng: 103.845070,
+        lat: 1.289825,
+        address: '55 Bencoolen St, Singapore 189650',
+        stars: 4.4,
+        reviews: '1.6k',
+        cuisineID: 6, // Western
+        category: 'Italian',
+        dishes: [
+          {
+            id: 1,
+            name: 'Margherita Pizza',
+            description: 'Classic pizza with tomato and mozzarella',
+            price: 16,
+            image: require('../assets/images/pizzaDish.png'),
+          },
+          {
+            id: 2,
+            name: 'Carbonara',
+            description: 'Pasta with creamy sauce and pancetta',
+            price: 18,
+            image: require('../assets/images/pizzaDish.png'),
+          },
+          {
+            id: 3,
+            name: 'Tiramisu',
+            description: 'Coffee-flavored Italian dessert',
+            price: 8,
+            image: require('../assets/images/pizzaDish.png'),
+          },
+        ],
+      },
+      {
+        id: 11,
+        name: 'Korean BBQ House',
+        image: require('../assets/images/KoreanBBQ.jpeg'),
+        description: 'Grill your own BBQ in a cozy setting',
+        lng: 103.859568,
+        lat: 1.308290,
+        address: '12 Tanjong Pagar Rd, Singapore 088439',
+        stars: 4.5,
+        reviews: '1.8k',
+        cuisineID: 2, // Korean
+        category: 'Korean BBQ',
+        dishes: [
+          {
+            id: 1,
+            name: 'Samgyeopsal',
+            description: 'Grilled pork belly with dipping sauces',
+            price: 25,
+            image: require('../assets/images/pizzaDish.png'),
+          },
+          {
+            id: 2,
+            name: 'Kimchi Jjigae',
+            description: 'Spicy kimchi stew with pork',
+            price: 15,
+            image: require('../assets/images/pizzaDish.png'),
+          },
+          {
+            id: 3,
+            name: 'Bibimbap',
+            description: 'Mixed rice with vegetables and meat',
+            price: 18,
+            image: require('../assets/images/pizzaDish.png'),
+          },
+        ],
+      },
+      {
+        id: 12,
+        name: 'La Vie En Rose',
+        image: require('../assets/images/LaVieEnRose.jpeg'),
+        description: 'Elegant French dining experience',
+        lng: 103.831228,
+        lat: 1.295123,
+        address: '19 Keppel Rd, Singapore 089058',
+        stars: 4.9,
+        reviews: '1.4k',
+        cuisineID: 6, // Western
+        category: 'French',
+        dishes: [
+          {
+            id: 1,
+            name: 'Coq au Vin',
+            description: 'Chicken braised with red wine',
+            price: 35,
+            image: require('../assets/images/pizzaDish.png'),
+          },
+          {
+            id: 2,
+            name: 'Ratatouille',
+            description: 'Vegetable stew from Provence',
+            price: 20,
+            image: require('../assets/images/pizzaDish.png'),
+          },
+          {
+            id: 3,
+            name: 'Crème Brûlée',
+            description: 'Creamy custard with caramelized top',
+            price: 12,
+            image: require('../assets/images/pizzaDish.png'),
+          },
+        ],
+      },
+      {
+        id: 13,
+        name: 'Bubba’s Seafood',
+        image: require('../assets/images/BubbasSeafood.jpeg'),
+        description: 'Fresh seafood with a touch of Southern charm',
+        lng: 103.841243,
+        lat: 1.290123,
+        address: '88 Thomson Rd, Singapore 307663',
+        stars: 4.4,
+        reviews: '1.2k',
+        cuisineID: 1, // Chinese
+        category: 'Seafood',
+        dishes: [
+          {
+            id: 1,
+            name: 'Seafood Platter',
+            description: 'Assorted seafood with dipping sauces',
+            price: 50,
+            image: require('../assets/images/pizzaDish.png'),
+          },
+          {
+            id: 2,
+            name: 'Lobster Roll',
+            description: 'Lobster meat in a soft roll',
+            price: 28,
+            image: require('../assets/images/pizzaDish.png'),
+          },
+          {
+            id: 3,
+            name: 'Clam Chowder',
+            description: 'Creamy clam soup',
+            price: 15,
+            image: require('../assets/images/pizzaDish.png'),
+          },
+        ],
+      },
     ],
   }
 
@@ -319,7 +535,7 @@ export const topRated = {
         address: '17A Dempsey Rd, Singapore 249676',
         stars: 4.7,
         reviews: '1.2k',
-        cuisineID: 1, // Assuming 1 is for Peranakan cuisine
+        cuisineID: 1,
         category: 'Peranakan',
         dishes: [
           {
@@ -355,7 +571,7 @@ export const topRated = {
         address: '1 St Andrew’s Rd, #01-04 National Gallery, Singapore 178957',
         stars: 4.8,
         reviews: '2.5k',
-        cuisineID: 2, // Assuming 2 is for French cuisine
+        cuisineID: 6, 
         category: 'French',
         dishes: [
           {
@@ -391,7 +607,7 @@ export const topRated = {
         address: '20 Teck Lim Rd, Singapore 088391',
         stars: 4.8,
         reviews: '2.7k',
-        cuisineID: 4,
+        cuisineID: 6,
         category: 'Australian',
         dishes: [
           {
@@ -427,7 +643,7 @@ export const topRated = {
         address: '8 Raffles Ave, #02-23, Esplanade Mall, Singapore 039802',
         stars: 4.6,
         reviews: '1.3k',
-        cuisineID: 1, // Assuming 1 is for Singaporean cuisine
+        cuisineID: 1,
         category: 'Singaporean',
         dishes: [
           {
@@ -463,7 +679,7 @@ export const topRated = {
         address: '1 Scotts Rd, #01-16 Shaw Centre, Singapore 228208',
         stars: 4.9,
         reviews: '1.6k',
-        cuisineID: 2, // Assuming 2 is for French cuisine
+        cuisineID: 6, 
         category: 'French',
         dishes: [
           {

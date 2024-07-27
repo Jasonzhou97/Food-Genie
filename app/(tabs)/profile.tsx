@@ -122,7 +122,7 @@ useEffect(() => {
 
   const handleSaveProfile = async () => {
     console.log('handleSaveProfile called');
-    
+  
     if (newName.trim()) {
       try {
         const firestore = getFirestore();
@@ -134,7 +134,7 @@ useEffect(() => {
         // Update Firestore document
         console.log('Updating Firestore document');
         await updateDoc(userDocRef, {
-          username: newName.trim(),
+          name: newName.trim(),  // Ensure this matches the field name in Firestore
         });
   
         console.log('Firestore document updated successfully');
@@ -142,11 +142,11 @@ useEffect(() => {
         // Update Firebase Auth profile
         console.log('Updating Firebase Auth profile');
         await updateProfile(auth.currentUser, {
-          displayName: newName.trim(),
+          displayName: newName.trim(),  // This updates the Firebase Auth displayName
         });
   
         console.log('Firebase Auth profile updated successfully');
-
+  
         // Update the local user context with the new name
         const updatedUser = {
           ...user,
@@ -165,6 +165,7 @@ useEffect(() => {
       Alert.alert('Error', 'Please enter a valid name.');
     }
   };
+  
 
   if (!user) {
     return (

@@ -1,14 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, StyleSheet, Text, Image, Alert, Button } from 'react-native';
+import { View, StyleSheet, Text, Image, Alert, TouchableOpacity } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
-import * as Location from 'expo-location';
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
-import { useRoute } from '@react-navigation/native';
+import { useRoute, useNavigation } from '@react-navigation/native';
 import { getFirestore, doc, updateDoc, collection, getDocs, addDoc } from 'firebase/firestore';
 import { auth } from '../../config/firebase';
 
 const Map = () => {
   const route = useRoute();
+  const navigation = useNavigation();
   const [currentPosition, setCurrentPosition] = useState(null);
   const [userLocations, setUserLocations] = useState([]);
   const [favoriteRestaurants, setFavoriteRestaurants] = useState([]);
@@ -17,50 +17,34 @@ const Map = () => {
   const googlePlacesRef = useRef(null);
   const searchQuery = route.params?.query;
 
-  // Function to update user location in Firestore
-  const updateUserLoc = async (latitude, longitude) => {
-    const firestore = getFirestore();
-    const user = auth.currentUser;
-
-    if (user) {
-      try {
-        const userDocRef = doc(firestore, 'users', user.uid);
-        await updateDoc(userDocRef, {
-          lastKnownLoc: {
-            latitude: latitude,
-            longitude: longitude
-          }
-        });
-      } catch (error) {
-        console.error('Error updating location:', error.message);
-      }
-    }
-  };
-
-  // Fetch current user's location on component mount
   useEffect(() => {
     const fetchUserLocations = async () => {
       const firestore = getFirestore();
       const usersCollection = collection(firestore, 'users');
-      const userDocs = await getDocs(usersCollection);
-  
-      const locations = userDocs.docs.map(doc => {
-        const data = doc.data();
-        return {
-          id: doc.id,
-          name: data.name, // Assuming `name` field exists in Firestore
-          latitude: data.latitude,
-          longitude: data.longitude,
-          avatarUrl: data.avatarUrl,
-        };
-      });
-  
-      console.log("User Locations:", locations); // Check console for fetched locations
-      setUserLocations(locations);
+
+      try {
+        const userDocs = await getDocs(usersCollection);
+        const locations = userDocs.docs.map(doc => {
+          const data = doc.data();
+          return {
+            id: doc.id,
+            name: data.name || 'Unknown',
+            latitude: data.lastKnownLoc?.latitude || null,
+            longitude: data.lastKnownLoc?.longitude || null,
+            avatarUrl: data.avatarUrl || null,
+          };
+        });
+
+        console.log("User Locations:", locations);
+        setUserLocations(locations);
+      } catch (error) {
+        console.error('Error fetching user locations:', error.message);
+      }
     };
-  
+
     fetchUserLocations();
   }, []);
+
   useEffect(() => {
     const fetchFavoriteRestaurants = async () => {
       const firestore = getFirestore();
@@ -80,39 +64,13 @@ const Map = () => {
 
     fetchFavoriteRestaurants();
   }, []);
-  // Fetch other users' locations from Firestore
-  useEffect(() => {
-    const fetchUserLocations = async () => {
-      const firestore = getFirestore();
-      const usersCollection = collection(firestore, 'users');
-      const userDocs = await getDocs(usersCollection);
-  
-      const locations = userDocs.docs.map(doc => {
-        const data = doc.data();
-        return {
-          id: doc.id,
-          name: data.name, // Assuming `name` field exists in Firestore
-          latitude: data.latitude,
-          longitude: data.longitude,
-          avatarUrl: data.avatarUrl,
-        };
-      });
-  
-      setUserLocations(locations);
-    };
-  
-    fetchUserLocations();
-  }, []);
-  
 
-  // Handle search query change
   useEffect(() => {
     if (searchQuery && googlePlacesRef.current) {
       googlePlacesRef.current.setAddressText(searchQuery);
     }
   }, [searchQuery]);
 
-  // Handle selection of a place from Google Places Autocomplete
   const onPlaceSelected = (data, details = null) => {
     if (details) {
       const { lat, lng } = details.geometry.location;
@@ -128,12 +86,20 @@ const Map = () => {
     }
   };
 
-  // Handle map taps
   const handleMapPress = (event) => {
     const { latitude, longitude } = event.nativeEvent.coordinate;
     setSelectedLocation({ latitude, longitude });
-  
-    // Prompt user to enter restaurant name
+
+    const user = auth.currentUser;
+
+    if (!user) {
+      Alert.alert('Sign In Required', 'You need to sign in to add favorite restaurants.', [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Sign In', onPress: () => navigation.navigate('Login') }
+      ]);
+      return;
+    }
+
     Alert.prompt(
       "Add Favorite Restaurant",
       "Enter the name of the restaurant:",
@@ -153,21 +119,20 @@ const Map = () => {
           },
         },
       ],
-      "plain-text", // Specify input type for the prompt
+      "plain-text",
       ""
     );
   };
-  
-  // Save favorite restaurant to Firestore
+
   const saveFavoriteRestaurant = async (latitude, longitude, restaurantName) => {
     const firestore = getFirestore();
     const user = auth.currentUser;
-  
+
     if (user) {
       try {
         const favoritesCollection = collection(firestore, `users/${user.uid}/favoriteRestaurants`);
         await addDoc(favoritesCollection, {
-          name: restaurantName, // Use the actual restaurant name
+          name: restaurantName,
           latitude,
           longitude,
           addedAt: new Date()
@@ -178,18 +143,16 @@ const Map = () => {
       }
     }
   };
-  
-  
+
   return (
     <View style={{ flex: 1 }}>
-      {/* Google Places Autocomplete */}
       <GooglePlacesAutocomplete
         ref={googlePlacesRef}
         placeholder="Search"
         fetchDetails={true}
         onPress={onPlaceSelected}
         query={{
-          key: 'AIzaSyAQB9pT0fdwuUIL_uLdF7g08wIQhiLGwas',
+          key: 'AIzaSyAQB9pT0fdwuUIL_uLdF7g08wIQhiLGwas', 
           language: 'en',
         }}
         styles={{
@@ -198,7 +161,6 @@ const Map = () => {
         }}
       />
 
-      {/* MapView */}
       <MapView
         ref={mapRef}
         style={{ flex: 1 }}
@@ -209,49 +171,54 @@ const Map = () => {
           longitudeDelta: 0.0421,
         }}
         region={currentPosition}
-        onPress={handleMapPress} // Handle map press
+        onPress={handleMapPress}
       >
-        {/* Render current user marker */}
         {currentPosition && (
           <Marker coordinate={currentPosition}>
-            <View style={styles.markerContainer}>
-              {/* Adjust avatar rendering */}
-              <View style={styles.avatarContainer}>
-                <Image source={require('@/assets/images/avatar_1.png')} style={styles.avatar} />
+            <View style={styles.currentUserMarker}>
+              <View style={styles.currentUserAvatarContainer}>
+                <Image
+                  source={require('@/assets/images/avatar_1.png')}
+                  style={styles.currentUserAvatar}
+                />
               </View>
               <Text style={{ fontSize: 24 }}>📍</Text>
             </View>
           </Marker>
         )}
 
-        {/* Render other users' markers */}
-        {userLocations.map((user, index) => (
-          <Marker
-            key={index}
-            coordinate={{ latitude: user.latitude, longitude: user.longitude }}
-          >
-            <View style={styles.markerContainer}>
-              <View style={styles.avatarContainer}>
-                <Image source={{ uri: user.avatarUrl }} style={styles.avatar} />
-              </View>
-              <Text style={{ fontSize: 24 }}>📍</Text>
-            </View>
-          </Marker>
-        ))}
+        {userLocations
+          .filter(user => user.latitude !== null && user.longitude !== null)
+          .map((user, index) => (
+            <Marker
+              key={index}
+              coordinate={{ latitude: user.latitude, longitude: user.longitude }}
+            >
+              <TouchableOpacity style={styles.markerContainer} onPress={() => navigation.navigate('Chatroom', { userId: user.id, userName: user.name })}>
+                <View style={styles.avatarContainer}>
+                  <Image
+                    source={user.avatarUrl ? { uri: user.avatarUrl } : require('@/assets/images/avatar_1.png')}
+                    style={styles.avatar}
+                  />
+                </View>
+                <Text style={{ fontSize: 12 }}>{user.name}</Text>
+                <Text style={{ fontSize: 24 }}>📍</Text>
+              </TouchableOpacity>
+            </Marker>
+          ))}
+
+        {/* Add markers for favorite restaurants */}
         {favoriteRestaurants.map((restaurant, index) => (
           <Marker
             key={index}
-            coordinate={{
-              latitude: restaurant.latitude || 0,
-              longitude: restaurant.longitude || 0,
-            }}
+            coordinate={{ latitude: restaurant.latitude, longitude: restaurant.longitude }}
           >
-            <View style={styles.marker}>
-              <Text style={styles.markerText}>❤️</Text>
+            <View style={styles.favoriteRestaurantMarker}>
+              <Text style={styles.heartEmoji}>❤️</Text>
+              <Text style={{ fontSize: 12, textAlign: 'center' }}>{restaurant.name}</Text>
             </View>
           </Marker>
         ))}
-
       </MapView>
     </View>
   );
@@ -296,11 +263,34 @@ const styles = StyleSheet.create({
     height: 40,
     borderRadius: 20,
   },
-  marker: {
+  currentUserMarker: {
     flexDirection: 'column',
     alignItems: 'center',
   },
-  markerText: {
+  currentUserAvatarContainer: {
+    marginLeft: 20,
+    borderWidth: 3,
+    borderColor: 'red',
+    borderRadius: 25,
+    overflow: 'hidden',
+    padding: 5,
+    backgroundColor: '#fff',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.8,
+    shadowRadius: 2,
+    elevation: 5,
+  },
+  currentUserAvatar: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+  },
+  favoriteRestaurantMarker: {
+    flexDirection: 'column',
+    alignItems: 'center',
+  },
+  heartEmoji: {
     fontSize: 24,
   },
 });

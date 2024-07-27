@@ -3,13 +3,14 @@ import React, { useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { ArrowLeftIcon } from 'react-native-heroicons/solid'
 import { useNavigation } from '@react-navigation/native'
-import { signInWithEmailAndPassword } from 'firebase/auth'
+import { signInWithEmailAndPassword,getAuth, sendPasswordResetEmail } from 'firebase/auth'
 import { auth } from '../config/firebase'
 
 export default function LoginScreen() {
   const navigation = useNavigation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  
 
   const handleSubmit = async () => {
     if (email && password) {
@@ -38,7 +39,20 @@ export default function LoginScreen() {
       Alert.alert('Sign In', 'Please fill in all fields');
     }
   };
-
+  const handleResetPassword = async () => {
+    if (email) {
+      try {
+        const auth = getAuth();
+        await sendPasswordResetEmail(auth, email);
+        Alert.alert('Password Reset', 'Password reset email sent.');
+      } catch (err) {
+        console.error('Error sending password reset email:', err.message);
+        Alert.alert('Error', 'Failed to send password reset email.');
+      }
+    } else {
+      Alert.alert('Error', 'Please enter your email address.');
+    }
+  };
   return (
     <View style={[styles.container, { backgroundColor: '#FFFFF' }]}>
       <SafeAreaView style={styles.safeArea}>
@@ -71,7 +85,8 @@ export default function LoginScreen() {
             onChangeText={value => setPassword(value)}
             autoCapitalize="none"
           />
-          <TouchableOpacity style={styles.forgotPassword}>
+          <TouchableOpacity style={styles.forgotPassword}
+            onPress={handleResetPassword}>
             <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={handleSubmit} style={styles.submitButton}>
@@ -80,15 +95,7 @@ export default function LoginScreen() {
         </View>
         <Text style={styles.orText}>Or</Text>
         <View style={styles.iconContainer}>
-          <TouchableOpacity style={styles.iconButton}>
-            <Image source={require('../assets/images/google.png')} style={styles.icon} />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.iconButton}>
-            <Image source={require('../assets/images/apple.jpeg')} style={styles.icon} />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.iconButton}>
-            <Image source={require('../assets/images/fb.png')} style={styles.icon} />
-          </TouchableOpacity>
+
         </View>
         <View style={styles.signupPromptContainer}>
           <Text style={styles.signupPromptText}>Don't have an account?</Text>

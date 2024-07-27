@@ -1,8 +1,8 @@
-import { View, Text, ScrollView, Image } from 'react-native';
+import { View, Text, ScrollView, Image,TouchableOpacity } from 'react-native';
 import React from 'react';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import tw from 'twrnc';
-import { TouchableOpacity } from 'react-native-gesture-handler';
+//import { TouchableOpacity } from 'react-native-gesture-handler';
 import * as Icon from 'react-native-feather';
 
 export default function Restaurant() {

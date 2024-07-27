@@ -1,23 +1,22 @@
-import { Image, StyleSheet, Platform,View, TouchableOpacity,Dimensions,Text } from 'react-native';
-import { SearchBar } from 'react-native-screens';
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
-import { TextInput } from 'react-native-gesture-handler';
-import { useMemo, useState } from 'react';
+import React, { useState, useContext } from 'react';
+import { Image, StyleSheet, View, TouchableOpacity, Dimensions, Text, useColorScheme } from 'react-native';
 import { Searchbar } from 'react-native-paper';
 import { Ionicons } from '@expo/vector-icons';
-import ImageCarousel from '@/components/Carousel'
-import { useNavigation} from '@react-navigation/native'
+import ImageCarousel from '../../components/Carousel';
+import { useNavigation } from '@react-navigation/native';
 import { AuthContext } from '../../hooks/AuthContext';
-import { useContext } from 'react';
-import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
+import ParallaxScrollView from '../../components/ParallaxScrollView';
 
 export default function HomeScreen() {
   const navigation = useNavigation();
-  const width = Dimensions.get('window').width;
   const { user } = useContext(AuthContext);
+  const [searchQuery, setSearchQuery] = useState('');
+  const scheme = useColorScheme(); // Detect current theme
+
+  const handleSearch = () => {
+    navigation.navigate('Map', { query: searchQuery });
+  };
+
   const iconPress = () => {
     if (user) {
       navigation.navigate('profile');
@@ -25,63 +24,59 @@ export default function HomeScreen() {
       navigation.navigate('SignUp');
     }
   };
-  //search bar state management
-  const [searchQuery, setSearchQuery] = useState('');
+
+  const mainContainerStyle = [styles.mainContainer, {
+    backgroundColor: scheme === 'dark' ? '#000000' : '#FFFFFF',
+  }];
+
+  const trendingTextStyle = [styles.trendingText, {
+    color: scheme === 'dark' ? '#FFFFFF' : '#000000',
+  }];
+
+  const iconColor = scheme === 'dark' ? '#FFFFFF' : '#000000';
+
   return (
     <ParallaxScrollView
       headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
       headerImage={
         <Image
-          source={require('@/assets/images/Logo.png')}
+          source={require('../../assets/images/Logo.png')}
           style={styles.stockLogo}
           resizeMode='contain'
         />
       }>
-
-
-      <View style={styles.mainContainer}>
-
+      <View style={mainContainerStyle}>
         <View style={styles.searchContainer}>
           <Searchbar
-           placeholder="Search"
-           onChangeText={setSearchQuery}
-           value={searchQuery}
-           style={styles.searchBar}
-           onSubmitEditing={() => navigation.navigate("map", { query: searchQuery })}
-        />
-        
-        <TouchableOpacity onPress={()=>iconPress()}>
-        <Ionicons name="person-circle-outline" size={40} color="black" style={styles.profileIcon} />
-        </TouchableOpacity>
+            placeholder="Search"
+            onChangeText={setSearchQuery}
+            value={searchQuery}
+            style={styles.searchBar}
+            onSubmitEditing={handleSearch}
+          />
+          <TouchableOpacity onPress={iconPress}>
+            <Ionicons name="person-circle-outline" size={40} color={iconColor} style={styles.profileIcon} />
+          </TouchableOpacity>
         </View>
       </View>
       <View>
-        <Text style={styles.trendingText}>Trending Places </Text>
+        <Text style={trendingTextStyle}>Trending Places</Text>
       </View>
-      <ImageCarousel/>
+      <ImageCarousel />
     </ParallaxScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
-  searchBar:{
-    flex:1,
-    marginRight:10,
-
+  searchBar: {
+    flex: 1,
+    marginRight: 10,
+    backgroundColor: 'transparent', // Transparent background to blend with mainContainer background
   },
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent:'space-between',
+    justifyContent: 'space-between',
     marginBottom: 16,
   },
   stockLogo: {
@@ -89,16 +84,17 @@ const styles = StyleSheet.create({
     height: 290,
     marginTop: -20,
   },
-  mainContainer:{
-    flex:1,
-    backgroundColor: '#fff',
+  mainContainer: {
+    flex: 1,
     paddingHorizontal: 16,
     paddingTop: 16,
   },
-  profileIcon:{
-    marginLeft:10,
+  profileIcon: {
+    marginLeft: 10,
   },
-  trendingText:{
-
-  }
+  trendingText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginVertical: 16,
+  },
 });
