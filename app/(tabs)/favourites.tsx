@@ -172,14 +172,14 @@ export default function FavouritesScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
+    padding: 30,
     backgroundColor: '#fff',
   },
   sectionHead: {
     fontSize: 20,
     fontWeight: 'bold',
     marginBottom: 10,
-    marginTop:10
+    paddingVertical: 20,
   },
   restaurantItem: {
     padding: 10,
@@ -203,7 +203,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#1E90FF',
     padding: 10,
     borderRadius: 5,
-    marginTop: 20,
     alignItems: 'center',
   },
   buttonText: {
