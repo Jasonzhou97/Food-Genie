@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, StyleSheet, Text, Image, Alert, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, Text, Image, Alert, TouchableOpacity, useColorScheme } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
 import { useRoute, useNavigation } from '@react-navigation/native';
@@ -9,6 +9,7 @@ import { auth } from '../../config/firebase';
 const Map = () => {
   const route = useRoute();
   const navigation = useNavigation();
+  const colorScheme = useColorScheme();
   const [currentPosition, setCurrentPosition] = useState(null);
   const [userLocations, setUserLocations] = useState([]);
   const [favoriteRestaurants, setFavoriteRestaurants] = useState([]);
@@ -44,6 +45,10 @@ const Map = () => {
 
     fetchUserLocations();
   }, []);
+
+  const avatarTap = (user) => {
+    navigation.navigate('RecommendRest', { userId: user.id, userName: user.name });
+  };
 
   useEffect(() => {
     const fetchFavoriteRestaurants = async () => {
@@ -144,6 +149,17 @@ const Map = () => {
     }
   };
 
+  const handleAvatarPress = (user) => (event) => {
+    event.stopPropagation();
+
+    const currentUser = auth.currentUser;
+    if (currentUser && currentUser.uid === user.id) {
+      return;
+    }
+
+    avatarTap(user);
+  };
+
   return (
     <View style={{ flex: 1 }}>
       <GooglePlacesAutocomplete
@@ -152,7 +168,7 @@ const Map = () => {
         fetchDetails={true}
         onPress={onPlaceSelected}
         query={{
-          key: 'AIzaSyAQB9pT0fdwuUIL_uLdF7g08wIQhiLGwas', 
+          key: 'AIzaSyAQB9pT0fdwuUIL_uLdF7g08wIQhiLGwas',
           language: 'en',
         }}
         styles={{
@@ -182,7 +198,7 @@ const Map = () => {
                   style={styles.currentUserAvatar}
                 />
               </View>
-              <Text style={{ fontSize: 24 }}>📍</Text>
+              <Text style={[styles.markerText, { color: colorScheme === 'dark' ? 'white' : 'black' }]}>📍</Text>
             </View>
           </Marker>
         )}
@@ -194,28 +210,27 @@ const Map = () => {
               key={index}
               coordinate={{ latitude: user.latitude, longitude: user.longitude }}
             >
-              <TouchableOpacity style={styles.markerContainer} onPress={() => navigation.navigate('Chatroom', { userId: user.id, userName: user.name })}>
+              <TouchableOpacity style={styles.markerContainer} onPress={handleAvatarPress(user)}>
                 <View style={styles.avatarContainer}>
                   <Image
                     source={user.avatarUrl ? { uri: user.avatarUrl } : require('@/assets/images/avatar_1.png')}
                     style={styles.avatar}
                   />
                 </View>
-                <Text style={{ fontSize: 12 }}>{user.name}</Text>
-                <Text style={{ fontSize: 24 }}>📍</Text>
+                <Text style={[styles.markerText, { color: colorScheme === 'dark' ? 'white' : 'black' }]}>{user.name}</Text>
+                <Text style={[styles.markerText, { color: colorScheme === 'dark' ? 'white' : 'black' }]}>📍</Text>
               </TouchableOpacity>
             </Marker>
           ))}
 
-        {/* Add markers for favorite restaurants */}
         {favoriteRestaurants.map((restaurant, index) => (
           <Marker
             key={index}
             coordinate={{ latitude: restaurant.latitude, longitude: restaurant.longitude }}
           >
             <View style={styles.favoriteRestaurantMarker}>
-              <Text style={styles.heartEmoji}>❤️</Text>
-              <Text style={{ fontSize: 12, textAlign: 'center' }}>{restaurant.name}</Text>
+              <Text style={[styles.heartEmoji, { color: colorScheme === 'dark' ? 'white' : 'black' }]}>❤️</Text>
+              <Text style={[styles.markerText, { color: colorScheme === 'dark' ? 'white' : 'black' }]}>{restaurant.name}</Text>
             </View>
           </Marker>
         ))}
@@ -292,6 +307,10 @@ const styles = StyleSheet.create({
   },
   heartEmoji: {
     fontSize: 24,
+  },
+  markerText: {
+    fontSize: 12,
+    textAlign: 'center',
   },
 });
 
