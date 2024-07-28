@@ -4,7 +4,7 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import tw from 'twrnc';
 import * as Icon from 'react-native-feather';
 import { getFirestore, collection, getDocs, addDoc } from 'firebase/firestore';
-import { auth } from '../config/firebase'; // adjust the import according to your project structure
+import { auth } from '../config/firebase'; 
 
 export default function Restaurant() {
     const navigation = useNavigation();
@@ -49,7 +49,7 @@ export default function Restaurant() {
                     await addDoc(favoritesCollection, {
                         name: item.name,
                         latitude: item.lat,
-                        longitude: item.lng,
+                        lonsgitude: item.lng,
                         addedAt: new Date()
                     });
 
