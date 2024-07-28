@@ -54,15 +54,30 @@ export default function FavouritesScreen() {
   };
 
   useEffect(() => {
+    console.log('Fetching favorite and recommended restaurants');
     fetchFavoriteRestaurants();
     fetchRecommendedRestaurants();
+
+    return () => {
+      console.log('Cleaning up favorite and recommended restaurants');
+      setFavRestaurants([]);
+      setRecommendedRestaurants([]);
+    };
   }, [user]);
-  //load the names of their favourite restaurants into chatgpt and ask for recommendation
+
+  useEffect(() => {
+    if (!user) {
+      console.log('User is logged out, resetting state');
+      setFavRestaurants([]);
+      setRecommendedRestaurants([]);
+    }
+  }, [user]);
+
   const recButton = async () => {
     try {
       const restaurantNames = favRestaurants.map(restaurant => restaurant.name).join(", ");
       const userInput = `Based on these favorite restaurants: ${restaurantNames}, recommend me restaurants or cuisine styles in singaporean context.`;
-      
+
       const response = await axios.post(
         'https://api.openai.com/v1/chat/completions',
         {
@@ -72,7 +87,7 @@ export default function FavouritesScreen() {
         },
         {
           headers: {
-            'Authorization': `Bearer sk-proj-taAkgo9f4Dbd088NclcWT3BlbkFJrm2wuyGiwKwMIvCiG6q6`, 
+            'Authorization': `Bearer sk-proj-taAkgo9f4Dbd088NclcWT3BlbkFJrm2wuyGiwKwMIvCiG6q6`,
             'Content-Type': 'application/json',
           },
         }
@@ -91,7 +106,7 @@ export default function FavouritesScreen() {
       Alert.alert('Error', 'Failed to fetch recommendations');
     }
   };
-  //add the recommended resaturant to own list
+
   const handleAddToFavorites = async (restaurant) => {
     try {
       const firestore = getFirestore();
@@ -109,7 +124,7 @@ export default function FavouritesScreen() {
       Alert.alert('Error', 'Failed to add to favorites');
     }
   };
-  //remove recommended restaurant 
+
   const handleRemoveRecommendation = async (restaurantId) => {
     try {
       const firestore = getFirestore();
