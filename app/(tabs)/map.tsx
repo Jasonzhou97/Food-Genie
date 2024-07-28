@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, StyleSheet, Text, Image, Alert, TouchableOpacity, useColorScheme } from 'react-native';
+import { View, StyleSheet, Text, Image, Alert, TouchableOpacity, useColorScheme, Modal, TextInput, Button } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
 import { useRoute, useNavigation } from '@react-navigation/native';
@@ -14,6 +14,9 @@ const Map = () => {
   const [userLocations, setUserLocations] = useState([]);
   const [favoriteRestaurants, setFavoriteRestaurants] = useState([]);
   const [selectedLocation, setSelectedLocation] = useState(null);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [restaurantName, setRestaurantName] = useState('');
+  const [newLocation, setNewLocation] = useState(null);
   const mapRef = useRef(null);
   const googlePlacesRef = useRef(null);
   const searchQuery = route.params?.query;
@@ -92,8 +95,9 @@ const Map = () => {
   };
 
   const handleMapPress = (event) => {
+    console.log('Map pressed', event.nativeEvent.coordinate);
     const { latitude, longitude } = event.nativeEvent.coordinate;
-    setSelectedLocation({ latitude, longitude });
+    setNewLocation({ latitude, longitude });
 
     const user = auth.currentUser;
 
@@ -105,31 +109,11 @@ const Map = () => {
       return;
     }
 
-    Alert.prompt(
-      "Add Favorite Restaurant",
-      "Enter the name of the restaurant:",
-      [
-        {
-          text: "Cancel",
-          style: "cancel",
-        },
-        {
-          text: "OK",
-          onPress: (restaurantName) => {
-            if (restaurantName.trim()) {
-              saveFavoriteRestaurant(latitude, longitude, restaurantName.trim());
-            } else {
-              Alert.alert("Error", "Please enter a valid restaurant name.");
-            }
-          },
-        },
-      ],
-      "plain-text",
-      ""
-    );
+    setModalVisible(true);
   };
 
-  const saveFavoriteRestaurant = async (latitude, longitude, restaurantName) => {
+  const saveFavoriteRestaurant = async () => {
+    const { latitude, longitude } = newLocation;
     const firestore = getFirestore();
     const user = auth.currentUser;
 
@@ -145,6 +129,9 @@ const Map = () => {
         Alert.alert("Success", "The location has been added to your favorite restaurants.");
       } catch (error) {
         console.error('Error adding favorite restaurant:', error.message);
+      } finally {
+        setModalVisible(false);
+        setRestaurantName('');
       }
     }
   };
@@ -179,7 +166,7 @@ const Map = () => {
 
       <MapView
         ref={mapRef}
-        style={{ flex: 1 }}
+        style={StyleSheet.absoluteFillObject}
         initialRegion={{
           latitude: 1.3521,
           longitude: 103.8198,
@@ -235,6 +222,27 @@ const Map = () => {
           </Marker>
         ))}
       </MapView>
+
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Add Favorite Restaurant</Text>
+            <TextInput
+              style={styles.modalInput}
+              placeholder="Enter restaurant name"
+              value={restaurantName}
+              onChangeText={setRestaurantName}
+            />
+            <Button title="Save" onPress={saveFavoriteRestaurant} />
+            <Button title="Cancel" onPress={() => setModalVisible(false)} />
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
@@ -311,6 +319,32 @@ const styles = StyleSheet.create({
   markerText: {
     fontSize: 12,
     textAlign: 'center',
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+  },
+  modalContent: {
+    width: '80%',
+    padding: 20,
+    backgroundColor: 'white',
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  modalInput: {
+    width: '100%',
+    padding: 10,
+    borderColor: 'gray',
+    borderWidth: 1,
+    borderRadius: 5,
+    marginBottom: 10,
   },
 });
 

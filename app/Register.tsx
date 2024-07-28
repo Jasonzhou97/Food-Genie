@@ -24,6 +24,7 @@ export default function SignUpScreen() {
         const firestore = getFirestore();
         await setDoc(doc(firestore, 'users', userId), {
           username: username,
+          name:username,
           email: email,
           favoriteRestaurants: [],
           level: 1,
@@ -38,7 +39,7 @@ export default function SignUpScreen() {
         Alert.alert('Sign Up', 'Sign up successful!', [
           {
             text: 'OK',
-            onPress: () => navigation.navigate('Home'),
+            onPress: () => navigation.navigate('index'),
           },
         ]);
       } catch (error) {

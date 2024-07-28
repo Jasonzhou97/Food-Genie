@@ -1,16 +1,19 @@
-import { View, Text } from 'react-native';
+import { View, Text, useColorScheme } from 'react-native';
 import React from 'react';
 import tw from 'twrnc';
-import { ScrollView, TouchableOpacity } from 'react-native-gesture-handler';
+import { ScrollView } from 'react-native-gesture-handler';
 import RestaurantPg from '@/components/RestaurantPg';
 
 export default function FeatRow({ title, description, restaurants }) {
+    const colorScheme = useColorScheme();
+    const isDarkMode = colorScheme === 'dark';
+
     return (
         <View>
             <View style={tw`flex-row items-center px-4 justify-between`}>
                 <View>
-                    <Text style={tw`text-lg font-bold`}>{title}</Text>
-                    <Text style = {tw`text-xs`}>{description}</Text>
+                    <Text style={[tw`text-lg font-bold`, { color: isDarkMode ? 'white' : 'black' }]}>{title}</Text>
+                    <Text style={[tw`text-xs`, { color: isDarkMode ? 'white' : 'black' }]}>{description}</Text>
                 </View>
             </View>
             <ScrollView

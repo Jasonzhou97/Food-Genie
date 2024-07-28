@@ -14,7 +14,7 @@ export default function HomeScreen() {
   const scheme = useColorScheme(); // Detect current theme
 
   const handleSearch = () => {
-    navigation.navigate('Map', { query: searchQuery });
+    navigation.navigate('map', { query: searchQuery });
   };
 
   const iconPress = () => {

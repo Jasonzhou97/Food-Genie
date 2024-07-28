@@ -19,7 +19,7 @@ export default function LoginScreen() {
         Alert.alert('Sign In', 'Sign in successful!', [
           {
             text: 'OK',
-            onPress: () => navigation.navigate('Home'),
+            onPress: () => navigation.navigate('index'),
           },
         ]);
       } catch (err) {

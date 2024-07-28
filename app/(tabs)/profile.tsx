@@ -184,7 +184,7 @@ useEffect(() => {
           <Image source={require('@/assets/images/avatar_1.png')} style={styles.avatar} />
         )}
         <Text style={styles.name}>{user.displayName}</Text>
-        <Button title="Choose Profile Picture" onPress={handleChoosePic} />
+
       </View>
 
       <FlatList
