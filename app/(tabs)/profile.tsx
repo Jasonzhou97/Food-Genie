@@ -18,7 +18,6 @@ export default function ProfileScreen() {
   const [modalVisible, setModalVisible] = useState(false);
   const [avatarSource, setAvatarSource] = useState(null);
 
-// Update useEffect to fetch favorite restaurants
 useEffect(() => {
     const fetchFavoriteRestaurants = async () => {
       if (user) {
@@ -55,7 +54,6 @@ useEffect(() => {
     };
     const docRef = await addDoc(favoritesCollection, newRestaurantData);
 
-    // Update local state to reflect the change
     setFavoriteRestaurants(prev => [...prev, { id: docRef.id, ...newRestaurantData }]);
     setNewRestaurant('');
     setModalVisible(false);
@@ -68,13 +66,11 @@ useEffect(() => {
 }
 
   const handleRemoveFavoriteRestaurant = async (id) => {
-    // Remove restaurant from Firestore
     try {
       const firestore = getFirestore();
       const favoritesCollection = collection(firestore, `users/${user.uid}/favoriteRestaurants`);
       await deleteDoc(doc(favoritesCollection, id));
   
-      // Update local state to show change
       setFavoriteRestaurants(prev => prev.filter(restaurant => restaurant.id !== id));
     } catch (error) {
       console.error('Error removing favorite restaurant:', error);
@@ -114,7 +110,6 @@ useEffect(() => {
         console.error('ImagePicker Error:', response.error);
         Alert.alert('Error', 'Failed to pick an image');
       } else {
-        // Set the selected image URI to state
         setAvatarSource(response.assets[0].uri);
       }
     });
@@ -131,23 +126,20 @@ useEffect(() => {
         console.log('Firestore initialized');
         console.log(`Document reference: users/${user.uid}`);
   
-        // Update Firestore document
         console.log('Updating Firestore document');
         await updateDoc(userDocRef, {
-          name: newName.trim(),  // Ensure this matches the field name in Firestore
+          name: newName.trim(), 
         });
   
         console.log('Firestore document updated successfully');
   
-        // Update Firebase Auth profile
         console.log('Updating Firebase Auth profile');
         await updateProfile(auth.currentUser, {
-          displayName: newName.trim(),  // This updates the Firebase Auth displayName
+          displayName: newName.trim(),  
         });
   
         console.log('Firebase Auth profile updated successfully');
-  
-        // Update the local user context with the new name
+
         const updatedUser = {
           ...user,
           displayName: newName.trim(),

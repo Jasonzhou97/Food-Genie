@@ -1,5 +1,5 @@
-import { View, Text, ScrollView, Image } from 'react-native';
-import React from 'react';
+import { View, Text, ScrollView, Image, TouchableOpacity, Alert } from 'react-native';
+import {React, useState, useEffect} from 'react';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import tw from 'twrnc';
 import * as Icon from 'react-native-feather';
@@ -53,7 +53,6 @@ export default function Restaurant() {
                         addedAt: new Date()
                     });
 
-                    // Update the state to include the new favorite
                     setFavoriteRestaurants([...favoriteRestaurants, {
                         name: item.name,
                         latitude: item.latitude,

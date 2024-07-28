@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, StyleSheet, Text, Image, Alert, TouchableOpacity, useColorScheme, Modal, TextInput, Button } from 'react-native';
+import { View, StyleSheet, Text, Image, Alert, TouchableOpacity, useColorScheme, Modal, TextInput, Button} from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { getFirestore, doc, updateDoc, collection, getDocs, addDoc } from 'firebase/firestore';
 import { auth } from '../../config/firebase';
+import * as Location from 'expo-location';
 
 const Map = () => {
   const route = useRoute();
@@ -78,6 +79,48 @@ const Map = () => {
       googlePlacesRef.current.setAddressText(searchQuery);
     }
   }, [searchQuery]);
+
+  useEffect(() => {
+    (async () => {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        console.log('Permission to access location was denied');
+        return;
+      }
+
+      let location = await Location.getCurrentPositionAsync({});
+      setCurrentPosition({
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
+        latitudeDelta: 0.0922,
+        longitudeDelta: 0.0421,
+      });
+      
+      Location.watchPositionAsync(
+        {
+          accuracy: Location.Accuracy.High,
+          timeInterval: 1000,
+          distanceInterval: 10,
+        },
+        (newLocation) => {
+          setCurrentPosition({
+            latitude: newLocation.coords.latitude,
+            longitude: newLocation.coords.longitude,
+            latitudeDelta: 0.0922,
+            longitudeDelta: 0.0421,
+          });
+          mapRef.current.animateToRegion({
+            latitude: newLocation.coords.latitude,
+            longitude: newLocation.coords.longitude,
+            latitudeDelta: 0.0922,
+            longitudeDelta: 0.0421,
+          }, 1000);
+        }
+      );
+    })();
+  }, []);
+
+
 
   const onPlaceSelected = (data, details = null) => {
     if (details) {
