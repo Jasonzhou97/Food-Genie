@@ -1,6 +1,6 @@
-import { View, Text, StyleSheet, Image, Platform, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, Image, Platform, ScrollView, TouchableOpacity } from 'react-native';
 import React, { useState } from 'react';
-import { TouchableOpacity, GestureHandlerRootView } from 'react-native-gesture-handler';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import tw from 'twrnc';
 import FeatRow from '@/components/FeatRow';
 import { cuisines, featured ,topRated} from '../../constants/cuisines';

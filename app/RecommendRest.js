@@ -2,7 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { Text, View, FlatList, TouchableOpacity, Alert, StyleSheet, useColorScheme } from 'react-native';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { getFirestore, addDoc, collection, getDocs } from 'firebase/firestore';
+import tw from 'twrnc';
 import { auth } from '../config/firebase';
+import * as Icon from 'react-native-feather';
 
 const RecommendRest = () => {
   const route = useRoute();
@@ -50,6 +52,10 @@ const RecommendRest = () => {
 
   return (
     <View style={styles.container}>
+      <TouchableOpacity onPress={()=>navigation.goBack()}
+                        style={[tw`absolute top-10 left-2 bg-gray-200 p-1 rounded-full`, { zIndex: 100 }]}>
+                        <Icon.ArrowLeft strokeWidth={3} stroke="black" width={32} height={32} />
+                    </TouchableOpacity>
       <Text style={[styles.header, { color: colorScheme === 'dark' ? 'white' : 'black' }]}>Recommend a Restaurant to {userName}</Text>
       <FlatList
         data={favoriteRestaurants}
@@ -73,6 +79,7 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   header: {
+    marginTop: 70,
     fontSize: 24,
     marginBottom: 20,
     textAlign: 'center',

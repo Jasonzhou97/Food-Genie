@@ -1,5 +1,5 @@
-import { View, Text, ScrollView, Image, Button, Alert,TouchableOpacity } from 'react-native';
-import React, { useEffect, useState } from 'react';
+import { View, Text, ScrollView, Image } from 'react-native';
+import React from 'react';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import tw from 'twrnc';
 import * as Icon from 'react-native-feather';
