@@ -31,7 +31,6 @@ export default function LoginScreen() {
           if (msg.includes('auth/invalid-credential')) msg = "Invalid email or password";
           Alert.alert('Sign In', msg);
         } else {
-          console.log('An unexpected error occurred', err);
           Alert.alert('Sign In', 'An unexpected error occurred. Please try again.');
         }
       }
@@ -39,6 +38,7 @@ export default function LoginScreen() {
       Alert.alert('Sign In', 'Please fill in all fields');
     }
   };
+  //reset pw function 
   const handleResetPassword = async () => {
     if (email) {
       try {
@@ -46,7 +46,7 @@ export default function LoginScreen() {
         await sendPasswordResetEmail(auth, email);
         Alert.alert('Password Reset', 'Password reset email sent.');
       } catch (err) {
-        console.error('Error sending password reset email:', err.message);
+        console.error('Error', err.message);
         Alert.alert('Error', 'Failed to send password reset email.');
       }
     } else {

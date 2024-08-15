@@ -6,6 +6,7 @@ import tw from 'twrnc';
 import { auth } from '../config/firebase';
 import * as Icon from 'react-native-feather';
 
+//function to recommend restaruant by using firestore
 const RecommendRest = () => {
   const route = useRoute();
   const navigation = useNavigation();
@@ -45,7 +46,6 @@ const RecommendRest = () => {
       Alert.alert('Success', 'Restaurant recommended successfully.');
       navigation.goBack();
     } catch (error) {
-      console.error('Error recommending restaurant:', error.message);
       Alert.alert('Error', 'Failed to recommend restaurant.');
     }
   };

@@ -5,14 +5,14 @@ import { getFirestore, doc, getDocs, collection, addDoc, deleteDoc } from 'fireb
 import { useNavigation } from '@react-navigation/native';
 import axios from 'axios';
 
-export default function FavouritesScreen() {
+export default function FavouritesScreen(){
+
   const { user } = useContext(AuthContext);
   const [favRestaurants, setFavRestaurants] = useState([]);
   const [recommendedRestaurants, setRecommendedRestaurants] = useState([]);
   const navigation = useNavigation();
-
   const [output, setOutput] = useState('');
-
+  //fetching fav from firebase
   const fetchFavoriteRestaurants = async () => {
     if (user) {
       try {
@@ -27,19 +27,17 @@ export default function FavouritesScreen() {
 
         setFavRestaurants(favoriteRestaurantsList);
       } catch (error) {
-        console.error('Error fetching favorite restaurants:', error);
         Alert.alert('Error', 'Failed to fetch favorite restaurants');
       }
     }
   };
-
+  //fetch recommended restaurants from firebase
   const fetchRecommendedRestaurants = async () => {
     if (user) {
       try {
         const firestore = getFirestore();
         const recommendedCollection = collection(firestore, `users/${user.uid}/recommendedRestaurants`);
         const recommendedSnapshot = await getDocs(recommendedCollection);
-
         const recommendedRestaurantsList = recommendedSnapshot.docs.map(doc => ({
           id: doc.id,
           ...doc.data()
@@ -72,7 +70,7 @@ export default function FavouritesScreen() {
       setRecommendedRestaurants([]);
     }
   }, [user]);
-
+  //connecting to openai
   const recButton = async () => {
     try {
       const restaurantNames = favRestaurants.map(restaurant => restaurant.name).join(", ");

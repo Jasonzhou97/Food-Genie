@@ -11,8 +11,9 @@ export default function HomeScreen() {
   const navigation = useNavigation();
   const { user } = useContext(AuthContext);
   const [searchQuery, setSearchQuery] = useState('');
-  const scheme = useColorScheme(); // Detect current theme
+  const scheme = useColorScheme(); // Detect current theme of user phone
 
+  //navigating to search page with the query they keyed in 
   const handleSearch = () => {
     navigation.navigate('map', { query: searchQuery });
   };
@@ -80,7 +81,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   stockLogo: {
-    width: '100%', // Adjust the width as needed
+    width: '100%', 
     height: 290,
     marginTop: -20,
   },

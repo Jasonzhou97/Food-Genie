@@ -18,6 +18,7 @@ export default function ProfileScreen() {
   const [modalVisible, setModalVisible] = useState(false);
   const [avatarSource, setAvatarSource] = useState(null);
 
+
 useEffect(() => {
     const fetchFavoriteRestaurants = async () => {
       if (user) {
@@ -35,7 +36,7 @@ useEffect(() => {
   
     fetchFavoriteRestaurants();
   }, [user]);
-  
+  //navigate to maps page for them to add
   const handleAdd = () =>{
     navigation.navigate('map');
   }
@@ -58,7 +59,6 @@ useEffect(() => {
     setNewRestaurant('');
     setModalVisible(false);
   } catch (error) {
-    console.error('Error adding favorite restaurant:', error);
     Alert.alert('Error', 'Failed to add favorite restaurant');
   }
   };
@@ -80,12 +80,10 @@ useEffect(() => {
 
   const handleLogout = async () => {
     try {
-      console.log('Logout button pressed');
       await signOut(auth);
       Alert.alert('Log Out', 'You have been signed out successfully');
       navigation.navigate('index'); 
     } catch (error) {
-      console.error('Sign Out Error:', error);
       Alert.alert('Sign Out Error');
     }
   };
@@ -96,24 +94,7 @@ useEffect(() => {
   };
 
 
-  const handleChoosePic = () => {
-    const options = {
-      mediaType: 'photo',
-      maxWidth: 150,
-      maxHeight: 150,
-      quality: 1,
-    };
-    launchImageLibrary(options, (response) => {
-      if (response.didCancel) {
-        console.log('User cancelled image picker');
-      } else if (response.error) {
-        console.error('ImagePicker Error:', response.error);
-        Alert.alert('Error', 'Failed to pick an image');
-      } else {
-        setAvatarSource(response.assets[0].uri);
-      }
-    });
-  };
+  
 
   const handleSaveProfile = async () => {
     console.log('handleSaveProfile called');
@@ -122,24 +103,14 @@ useEffect(() => {
       try {
         const firestore = getFirestore();
         const userDocRef = doc(firestore, 'users', user.uid);
-  
-        console.log('Firestore initialized');
-        console.log(`Document reference: users/${user.uid}`);
-  
-        console.log('Updating Firestore document');
         await updateDoc(userDocRef, {
           name: newName.trim(), 
         });
   
-        console.log('Firestore document updated successfully');
-  
-        console.log('Updating Firebase Auth profile');
         await updateProfile(auth.currentUser, {
           displayName: newName.trim(),  
         });
   
-        console.log('Firebase Auth profile updated successfully');
-
         const updatedUser = {
           ...user,
           displayName: newName.trim(),
@@ -147,10 +118,8 @@ useEffect(() => {
         setUser(updatedUser);
   
         setEditModalVisible(false);
-        console.log('Profile name updated:', newName.trim());
         Alert.alert('Success', 'Profile name updated successfully');
       } catch (error) {
-        console.error('Error updating profile name:', error);
         Alert.alert('Error', 'Failed to update profile name');
       }
     } else {
@@ -195,11 +164,9 @@ useEffect(() => {
       <TouchableOpacity style={styles.addButton} onPress={handleAdd}>
         <Text style={styles.addButtonText}>Add Favorite Restaurant</Text>
       </TouchableOpacity>
-
       <TouchableOpacity style={styles.editButton} onPress={editProfilePress}>
         <Text style={styles.editButtonText}>Edit Profile</Text>
       </TouchableOpacity>
-
       <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
         <Text style={styles.logoutButtonText}>Log Out</Text>
       </TouchableOpacity>

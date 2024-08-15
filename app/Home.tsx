@@ -75,7 +75,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   stockLogo: {
-    width: '100%', // Adjust the width as needed
+    width: '100%', 
     height: 300,
   },
   mainContainer:{

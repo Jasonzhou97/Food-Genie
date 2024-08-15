@@ -58,7 +58,7 @@ export const featured = {
         address: '246M Upper Thomson Rd, Singapore 574370',
         stars: 4.2,
         reviews: '2.1k',
-        cuisineID: 7, // Indian
+        cuisineID: 7, 
         category: 'Singaporean',
         dishes: [
           {
@@ -94,7 +94,7 @@ export const featured = {
         address: '20 Upper Circular Rd, The Riverwalk, Singapore 058416',
         stars: 4.7,
         reviews: '3.2k',
-        cuisineID: 1, // Chinese
+        cuisineID: 1, 
         category: 'Seafood',
         dishes: [
           {
@@ -130,7 +130,7 @@ export const featured = {
         address: '38 Beach Rd, #01-04 South Beach Tower, Singapore 189767',
         stars: 4.3,
         reviews: '1.8k',
-        cuisineID: 5, // Western
+        cuisineID: 5,
         category: 'American',
         dishes: [
           {
@@ -202,7 +202,7 @@ export const featured = {
         address: '76-78 Serangoon Rd, Singapore 217981',
         stars: 4.6,
         reviews: '1.5k',
-        cuisineID: 7, // Indian
+        cuisineID: 7,
         category: 'Indian',
         dishes: [
           {

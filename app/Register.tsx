@@ -69,8 +69,11 @@ export default function SignUpScreen() {
           <Image source={require('../assets/images/login.jpeg')} style={styles.signupImage} />
         </View>
       </SafeAreaView>
+
       <View style={styles.formContainer}>
+
         <View style={styles.form}>
+
           <Text style={styles.label}>Username</Text>
           <TextInput
             style={styles.input}
@@ -101,6 +104,7 @@ export default function SignUpScreen() {
               Sign Up
             </Text>
           </TouchableOpacity>
+          
         </View>
         <Text style={styles.orText}>Or</Text>
         <View style={styles.iconContainer}>
