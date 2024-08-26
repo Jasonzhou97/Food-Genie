@@ -85,7 +85,7 @@ export default function FavouritesScreen(){
         },
         {
           headers: {
-            'Authorization': `Bearer sk-proj-taAkgo9f4Dbd088NclcWT3BlbkFJrm2wuyGiwKwMIvCiG6q6`,
+            'Authorization': ``,
             'Content-Type': 'application/json',
           },
         }
